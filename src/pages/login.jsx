@@ -42,7 +42,7 @@ const Login = () => {
 
   return (
     <div className='container'>
-      <h1 className='logo '>AdHub</h1>
+      <h1 className='logo '>AdBoardHub</h1>
       <div className='login-container'>
         <h2 className='login-title'>{state === 'sign up' ? 'Sign up' : 'Login'}</h2>
         <div className='login-card'>

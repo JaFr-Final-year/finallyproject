@@ -4,7 +4,7 @@ const Navbar = () => {
     const navigate = useNavigate()
     return (
         <div className='nav-container'>
-            <h1 className='logo'   >AdHub</h1>
+            <h1 className='logo'   >AdBoardHub</h1>
             <ul className='navbar'>
                 <li onClick={() => navigate('/services')}>Services</li>
                 <li onClick={() => navigate('/about')}>About</li>
