@@ -1,0 +1,260 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+
+* {
+  font-family: "Outfit", sans-serif;
+}
+
+.logo {
+  font-size: 2rem;
+  margin: 1rem;
+  color: #fff;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.navbar {
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+  padding: 1rem;
+}
+
+.nav-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #3B82F6;
+}
+
+.login-btn {
+
+  background-color: #fff;
+  border: 1px solid #fff;
+  color: #3B82F6;
+  padding: 0.5rem 1rem;
+  margin: 1rem;
+  border-radius: 5px;
+  font-size: 15px;
+  width: 7rem;
+  font-weight: bold;
+}
+
+.navbar li {
+  font-weight: bold;
+  list-style: none;
+  color: #f3f4f6;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+}
+
+.navbar li:hover {
+  cursor: pointer;
+  color: #3B82F6;
+  border: 1px solid #3B82F6;
+  background-color: #fff;
+}
+
+.login-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  height: 400px;
+  width: 500px;
+  background-color: #fff;
+  border-radius: 20px;
+  border: none;
+  box-shadow: 0 0 10px #3B82F6;
+}
+
+.login-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 20px;
+  align-items: center;
+  justify-content: center;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #2563EB;
+  margin: 0;
+  padding: 0;
+}
+
+.login-title {
+  font-size: 2rem;
+  margin: 1rem;
+  color: #fff;
+}
+
+.login-name {
+  font-size: 1.5em;
+  margin: 1rem;
+  color: #2563EB;
+}
+
+.login-card input {
+  width: 100%;
+  padding: 0.5rem;
+  margin: 0.5rem;
+  border-radius: 5px;
+  border: 1px solid #3B82F6;
+}
+
+.login-button {
+  background-color: #3B82F6;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  margin: 1rem;
+  border-radius: 5px;
+  font-size: 15px;
+  width: 7rem;
+  font-weight: bold;
+  border: none;
+}
+.login-button:hover {
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  margin: 1rem;
+  border-radius: 5px;
+  font-size: 15px;
+  width: 7rem;
+  font-weight: bold;
+  border: 1px solid #3B82F6;
+  box-shadow: 0 0 10px #3B82F6;
+} 
+
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.radio-input {
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+  align-items: center;
+  border-radius: 0.5rem;
+}
+
+.radio-input-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  margin-top: 10px; 
+}
+
+.radio-input-item input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  
+}
+
+/* Label styling defaults */
+.radio-input-item label {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #2563EB;
+
+  letter-spacing: 0.1rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  padding-left: 1.8rem;
+  /* Space for the custom radio circle */
+}
+
+/* The visual radio circle (replaces .cyan-selector) */
+.radio-input-item label::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid #3B82F6;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 0 0.5rem rgba(59, 130, 246, 0.2), 0 0 0.5rem rgba(59, 130, 246, 0.3);
+  background: #fff;
+}
+
+/* The inner selected dot (replaces .cyan-selector::before) */
+.radio-input-item label::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0.600rem;
+  /* Center horizontally in the 1.25rem box (left:0 + width/2) */
+  transform: translate(-50%, -50%) scale(0);
+  width: 0.50rem;
+  height: 0.50rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3B82F6, #2563EB);
+  box-shadow: 0 0 1rem rgba(59, 130, 246, 0.8);
+  transition: transform 0.3s cubic-bezier(0.68, -0.6, 0.32, 1.6);
+  opacity: 0;
+}
+
+/* Hover effects */
+.radio-input-item:hover label::before {
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: inset 0 0 1rem rgba(59, 130, 246, 0.3), 0 0 1rem rgba(59, 130, 246, 0.5);
+  border-color: #2563EB;
+}
+
+.radio-input-item:hover label {
+  text-shadow: 0 0 1rem rgba(59, 130, 246, 0.3);
+}
+
+/* Active/Click effect */
+.radio-input-item:active label::before {
+  transform: translateY(-50%) scale(0.95);
+}
+
+/* Checked state logic: Input is sibling to label */
+.radio-input-item input:checked+label::after {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+}
+
+.radio-input-item input:checked+label::before {
+  animation: pulse 2s infinite;
+  border-color: #3B82F6;
+}
+
+.radio-input-item input:checked+label {
+  color: #3B82F6;
+  text-shadow: 0 0 1rem rgba(59, 130, 246, 0.5);
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    box-shadow: inset 0 0 0.5rem rgba(59, 130, 246, 0.3), 0 0 1rem rgba(59, 130, 246, 0.5);
+  }
+
+  50% {
+    box-shadow: inset 0 0 1rem rgba(59, 130, 246, 0.4), 0 0 1.5rem rgba(59, 130, 246, 0.7);
+  }
+}
+span{
+  color: #2563EB  ;
+  cursor: pointer;  
+}
