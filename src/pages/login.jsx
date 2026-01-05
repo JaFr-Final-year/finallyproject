@@ -1,16 +1,21 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../utils/supabase'
 
 const Login = () => {
+  const navigate = useNavigate();
   const [state, setState] = useState("sign up");
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleAuth = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
     try {
       if (state === 'sign up') {
@@ -32,8 +37,10 @@ const Login = () => {
         });
         if (error) throw error;
         alert('Logged in successfully!');
+        navigate('/');
       }
     } catch (error) {
+      console.error('Authentication Error:', error);
       setError(error.message);
     } finally {
       setLoading(false);
@@ -59,24 +66,25 @@ const Login = () => {
               <input type="email" placeholder='Email' value={email} onChange={(e) => setEmail(e.target.value)} />
             </div>
 
-            <div className='input-container'  >
-              <input type="password" placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)} />
+            <div className='input-container'>
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder='Password'
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            <div className="show-password-container">
+              <input
+                type="checkbox"
+                id="show-password"
+                checked={showPassword}
+                onChange={() => setShowPassword(!showPassword)}
+              />
+              <label htmlFor="show-password">Show Password</label>
             </div>
 
-            <div className='radio-input'  >
-              {state === 'sign up' && (
-                <>
-                  <div className='radio-input-item' >
-                    <input type="radio" name="register-type" id="register-type" />
-                    <label htmlFor="register-type">Buyer</label>
-                  </div>
-                  <div className='radio-input-item' >
-                    <input type="radio" name="register-type" id="register-type-seller" />
-                    <label htmlFor="register-type-seller">Seller</label>
-                  </div>
-                </>
-              )}
-            </div>
+
             <button className='login-button'>{state === 'sign up' ? 'Sign up' : 'Login'}</button>
             <p>{state === 'sign up' ? 'Already have an account? ' : "Don't have an account? "} </p>
             <span onClick={() => setState(state === 'sign up' ? 'sign in' : 'sign up')} > {state === 'sign up' ? 'Sign in' : 'Sign up'}</span>
