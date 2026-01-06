@@ -1,12 +1,31 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { supabase } from '../utils/supabase'
 
 const Navbar = () => {
     const navigate = useNavigate()
     const [searchTerm, setSearchTerm] = useState('')
     const [showSuggestions, setShowSuggestions] = useState(false)
+    const [user, setUser] = useState(null)
 
     const locations = ["New York", "Los Angeles", "Chicago", "Houston", "Phoenix", "Philadelphia", "San Antonio", "San Diego", "Dallas", "San Jose"]
+
+    useEffect(() => {
+        // Get initial session
+        const getUser = async () => {
+            const { data: { session } } = await supabase.auth.getSession()
+            setUser(session?.user ?? null)
+        }
+
+        getUser()
+
+        // Listen for auth changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUser(session?.user ?? null)
+        })
+
+        return () => subscription.unsubscribe()
+    }, [])
 
     const handleSearch = (e) => {
         setSearchTerm(e.target.value)
@@ -56,6 +75,16 @@ const Navbar = () => {
         }
     }
 
+    const handleLogout = async () => {
+        const { error } = await supabase.auth.signOut()
+        if (error) {
+            console.error("Error logging out:", error)
+            alert("Error logging out")
+        } else {
+            navigate('/')
+        }
+    }
+
     return (
         <div className='nav-container'>
             <h1 className='logo' onClick={() => navigate('/')}>SpaceToAd</h1>
@@ -89,7 +118,11 @@ const Navbar = () => {
                 <li onClick={() => navigate('/contact')}>Contact</li>
             </ul>
             <div>
-                <button className='login-btn' onClick={() => navigate('/login')}>Login</button>
+                {user ? (
+                    <button className='login-btn' onClick={handleLogout}>Logout</button>
+                ) : (
+                    <button className='login-btn' onClick={() => navigate('/login')}>Login</button>
+                )}
                 <button className='login-btn' onClick={() => navigate('/vendor')}>Rent Out</button>
             </div>
         </div>
