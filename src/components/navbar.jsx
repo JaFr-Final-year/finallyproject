@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../utils/supabase'
+import logouticon from '../assets/logout.png'
+import usericon from '../assets/user.png'   
 
 const Navbar = () => {
     const navigate = useNavigate()
+    const location = useLocation()
     const [searchTerm, setSearchTerm] = useState('')
     const [showSuggestions, setShowSuggestions] = useState(false)
     const [user, setUser] = useState(null)
@@ -119,11 +122,14 @@ const Navbar = () => {
             </ul>
             <div>
                 {user ? (
-                    <button className='login-btn' onClick={handleLogout}>Logout</button>
+                    <div className='nav-right-btn'>
+                        {location.pathname !== '/vendor' && <button className='rentout-btn' onClick={() => navigate('/vendor')}>Rent Out</button>}
+                         <button className='user-btn' onClick={() => navigate('/profile')}><img src={usericon} alt="Profile" /></button>
+                        <button className='login-btn logout-btn' onClick={handleLogout}><img src={logouticon} alt="Logout" /> </button>
+                    </div>
                 ) : (
                     <button className='login-btn' onClick={() => navigate('/login')}>Login</button>
                 )}
-                <button className='login-btn' onClick={() => navigate('/vendor')}>Rent Out</button>
             </div>
         </div>
     )
