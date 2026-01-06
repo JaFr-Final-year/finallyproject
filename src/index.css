@@ -1,3 +1,4 @@
+/* Global Styles & Reset */
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
 
 * {
@@ -15,6 +16,7 @@ body {
   padding: 0;
 }
 
+/* Navbar Styles */
 .navbar {
   display: flex;
   flex-direction: row;
@@ -119,6 +121,7 @@ body {
   background-color: #fff;
 }
 
+/* Login & Authentication Styles */
 .login-card {
   display: flex;
   flex-direction: column;
@@ -240,6 +243,7 @@ span {
   font-weight: 500;
 }
 
+/* Location Search & Suggestions */
 .location-search {
   position: relative;
   display: flex;
@@ -347,6 +351,7 @@ span {
 }
 
 /* Product Cards Grid */
+/* Product Card Grid & Items */
 .products-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));

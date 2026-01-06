@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react'
 import Navbar from '../components/navbar'
 import { supabase } from '../utils/supabase'
 
+/**
+ * Home page component that displays available advertising spaces.
+ * Supports filtering by category and sorting (UI only in this version).
+ */
 const Home = () => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -9,7 +13,9 @@ const Home = () => {
   const [filterCategory, setFilterCategory] = useState('all')
 
   useEffect(() => {
-    // Get initial session
+    /**
+     * Fetches current user session on mount.
+     */
     const getUser = async () => {
       const { data: { session } } = await supabase.auth.getSession()
       setUser(session?.user ?? null)
@@ -18,7 +24,9 @@ const Home = () => {
 
     getUser()
 
-    // Listen for auth changes
+    /**
+     * Listens for authentication state changes.
+     */
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
     })
@@ -26,7 +34,7 @@ const Home = () => {
     return () => subscription.unsubscribe()
   }, [])
 
-  // Sample product data
+  // Mock data for advertising products
   const products = [
     { id: 1, name: 'Billboard - Highway 101', location: 'New York', price: '$500/month', category: 'billboard', image: '🏙️', size: '14x48 ft' },
     { id: 2, name: 'Digital Screen - Times Square', location: 'New York', price: '$2000/month', category: 'digital', image: '📺', size: '20x30 ft' },
@@ -40,6 +48,7 @@ const Home = () => {
     <div>
       <Navbar />
       <div className="home-container">
+        {/* Personalized welcome message */}
         {!loading && user && (
           <h1 className="welcome-text">Welcome {user.user_metadata?.name || user.email}</h1>
         )}
@@ -50,7 +59,7 @@ const Home = () => {
           <h1 className="welcome-text">Loading...</h1>
         )}
 
-        {/* Filter and Sort Section */}
+        {/* Filter and Sort UI Controls */}
         <div className="filter-sort-container">
           <div className="filter-section">
             <label>Filter by Category:</label>
@@ -82,7 +91,7 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Product Cards Grid */}
+        {/* Dynamic Product Grid */}
         <div className="products-grid">
           {products
             .filter(product => filterCategory === 'all' || product.category === filterCategory)
