@@ -17,13 +17,24 @@ const Navbar = () => {
     // Predefined list of locations for suggestions
     const locations = ["New York", "Los Angeles", "Chicago", "Houston", "Phoenix", "Philadelphia", "San Antonio", "San Diego", "Dallas", "San Jose"]
 
+    // Logic to determine which locations to show
+    const isExactMatch = locations.some(loc => loc.toLowerCase() === searchTerm.toLowerCase())
+    const displayedLocations = isExactMatch
+        ? locations
+        : locations.filter(loc => loc.toLowerCase().includes(searchTerm.toLowerCase()))
+
+
     useEffect(() => {
         /**
          * Fetches the current user session on component mount.
          */
         const getUser = async () => {
-            const { data: { session } } = await supabase.auth.getSession()
-            setUser(session?.user ?? null)
+            const { data, error } = await supabase.auth.getSession()
+            if (!error && data?.session) {
+                setUser(data.session.user)
+            } else {
+                setUser(null)
+            }
         }
 
         getUser()
@@ -54,59 +65,10 @@ const Navbar = () => {
      */
     const selectLocation = (loc) => {
         setSearchTerm(loc)
-        setShowSuggestions(false)
+        setShowSuggestions(true)
     }
 
-    /**
-     * Uses the browser Geolocation API to find the user's current city name.
-     * Now using Google Maps Geocoding API.
-     */
-    const getCurrentLocation = () => {
-        if ('geolocation' in navigator) {
-            navigator.geolocation.getCurrentPosition(async (position) => {
-                const { latitude, longitude } = position.coords;
-                const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
-                if (!apiKey || apiKey === 'YOUR_GOOGLE_MAPS_API_KEY_HERE') {
-                    console.error("Google Maps API Key is missing or invalid.");
-                    alert("Please configure your Google Maps API Key in the .env file.");
-                    return;
-                }
-
-                try {
-                    // Reverse geocoding using Google Maps API
-                    const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`);
-                    const data = await response.json();
-
-                    if (data.status === 'OK' && data.results.length > 0) {
-                        // Find the city/locality from address components
-                        const addressComponents = data.results[0].address_components;
-                        const cityComponent = addressComponents.find(c =>
-                            c.types.includes('locality') ||
-                            c.types.includes('administrative_area_level_2') ||
-                            c.types.includes('postal_town')
-                        );
-
-                        const locationName = cityComponent ? cityComponent.long_name : "Current Location";
-                        setSearchTerm(locationName);
-                    } else {
-                        console.error("Geocoding failed:", data.status);
-                        setSearchTerm("Current Location");
-                    }
-                    setShowSuggestions(false);
-                } catch (error) {
-                    console.error("Error fetching location from Google Maps", error);
-                    setSearchTerm("Current Location");
-                    setShowSuggestions(false);
-                }
-            }, (error) => {
-                console.error("Geolocation error", error);
-                alert("Unable to retrieve your location. Please allow location access.");
-            });
-        } else {
-            alert("Geolocation is not supported by your browser");
-        }
-    }
 
     /**
      * Handles user logout via Supabase.
@@ -139,10 +101,10 @@ const Navbar = () => {
                 />
                 {showSuggestions && (
                     <ul className="suggestions-list">
-                        <li className="suggestion-item current-location" onClick={getCurrentLocation}>
+                        <li className="suggestion-item current-location">
                             📍 Use Current Location
                         </li>
-                        {locations.filter(loc => loc.toLowerCase().includes(searchTerm.toLowerCase())).map((loc, index) => (
+                        {displayedLocations.map((loc, index) => (
                             <li key={index} className="suggestion-item" onClick={() => selectLocation(loc)}>
                                 {loc}
                             </li>

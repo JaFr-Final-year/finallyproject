@@ -17,9 +17,15 @@ const Home = () => {
      * Fetches current user session on mount.
      */
     const getUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      setUser(session?.user ?? null)
-      setLoading(false)
+      try {
+        const { data, error } = await supabase.auth.getSession()
+        if (error) throw error
+        setUser(data.session?.user ?? null)
+      } catch (error) {
+        console.error('Error fetching session:', error.message)
+      } finally {
+        setLoading(false)
+      }
     }
 
     getUser()
