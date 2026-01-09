@@ -706,3 +706,28 @@ span {
 .file-input-hidden {
   display: none;
 }
+
+.google-button {
+  background-color: #fff;
+  color: #333;
+  padding: 0.5rem 1rem;
+  margin: 0.5rem 1rem;
+  border-radius: 5px;
+  font-size: 15px;
+  width: auto;
+  min-width: 7rem;
+  font-weight: bold;
+  border: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.google-button:hover {
+  cursor: pointer;
+  background-color: #f9f9f9;
+  border: 1px solid #ccc;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
