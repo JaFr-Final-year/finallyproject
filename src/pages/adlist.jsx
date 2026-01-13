@@ -13,6 +13,10 @@ const AdList = () => {
   const [location, setLocation] = useState('')
   const [showSuggestions, setShowSuggestions] = useState(false)
 
+  const openAdDetails = (id) => {
+    window.open(`/ad/${id}`, '_blank')
+  }
+
   const popularLocations = ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix', 'Philadelphia', 'San Antonio', 'San Diego', 'Dallas', 'San Jose']
 
   const handleCurrentLocation = () => {
@@ -58,16 +62,6 @@ const AdList = () => {
 
     return () => subscription.unsubscribe()
   }, [])
-
-  // Mock data for advertising products
-  const products = [
-    { id: 1, name: 'Billboard - Highway 101', location: 'New York', price: '$500/month', category: 'billboard', image: '🏙️', size: '14x48 ft' },
-    { id: 2, name: 'Digital Screen - Times Square', location: 'New York', price: '$2000/month', category: 'digital', image: '📺', size: '20x30 ft' },
-    { id: 3, name: 'Bus Stop Ad - Downtown', location: 'Los Angeles', price: '$300/month', category: 'transit', image: '🚌', size: '4x6 ft' },
-    { id: 4, name: 'Wall Mural - Main Street', location: 'Chicago', price: '$800/month', category: 'mural', image: '🎨', size: '30x40 ft' },
-    { id: 5, name: 'Billboard - Route 66', location: 'Phoenix', price: '$450/month', category: 'billboard', image: '🛣️', size: '14x48 ft' },
-    { id: 6, name: 'Digital Billboard - Airport', location: 'Dallas', price: '$1500/month', category: 'digital', image: '✈️', size: '16x32 ft' },
-  ]
 
   return (
     <div>
@@ -176,8 +170,26 @@ const AdList = () => {
         <div className="products-grid">
           {products
             .filter(product => filterCategory === 'all' || product.category === filterCategory)
+            .sort((a, b) => {
+              if (sortBy === 'newest') return b.id - a.id;
+              if (sortBy === 'price-low') {
+                return parseInt(a.price.replace(/[^0-9]/g, '')) - parseInt(b.price.replace(/[^0-9]/g, ''));
+              }
+              if (sortBy === 'price-high') {
+                return parseInt(b.price.replace(/[^0-9]/g, '')) - parseInt(a.price.replace(/[^0-9]/g, ''));
+              }
+              if (sortBy === 'location') {
+                return a.location.localeCompare(b.location);
+              }
+              return 0;
+            })
             .map(product => (
-              <div key={product.id} className="product-card">
+              <div
+                key={product.id}
+                className="product-card"
+                onClick={() => openAdDetails(product.id)}
+                style={{ cursor: 'pointer' }}
+              >
                 <div className="product-image">{product.image}</div>
                 <div className="product-info">
                   <h3 className="product-name">{product.name}</h3>
@@ -185,7 +197,15 @@ const AdList = () => {
                   <p className="product-size">📏 {product.size}</p>
                   <div className="product-footer">
                     <span className="product-price">{product.price}</span>
-                    <button className="view-btn">View Details</button>
+                    <button
+                      className="view-btn"
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent double trigger if button is clicked
+                        openAdDetails(product.id);
+                      }}
+                    >
+                      View Details
+                    </button>
                   </div>
                 </div>
               </div>
@@ -196,4 +216,15 @@ const AdList = () => {
   );
 }
 
+
 export default AdList
+
+// Mock data for advertising products
+export const products = [
+  { id: 1, name: 'Billboard - Highway 101', location: 'New York', price: '$500/month', category: 'billboard', image: '🏙️', size: '14x48 ft', description: 'High visibility billboard on the main highway, perfect for large-scale brand awareness campaigns. Visible to thousands of daily commuters.' },
+  { id: 2, name: 'Digital Screen - Times Square', location: 'New York', price: '$2000/month', category: 'digital', image: '📺', size: '20x30 ft', description: 'Bright digital screen in the heart of the city. High engagement and dynamic content capabilities.' },
+  { id: 3, name: 'Bus Stop Ad - Downtown', location: 'Los Angeles', price: '$300/month', category: 'transit', image: '🚌', size: '4x6 ft', description: 'Target commuters with this bus stop ad. Great for local reach and high frequency exposure.' },
+  { id: 4, name: 'Wall Mural - Main Street', location: 'Chicago', price: '$800/month', category: 'mural', image: '🎨', size: '30x40 ft', description: 'Artistic wall mural on a busy street. Creates a unique and memorable brand impression.' },
+  { id: 5, name: 'Billboard - Route 66', location: 'Phoenix', price: '$450/month', category: 'billboard', image: '🛣️', size: '14x48 ft', description: 'Classic billboard location on the historic Route 66. Ideal for travel and tourism related advertisements.' },
+  { id: 6, name: 'Digital Billboard - Airport', location: 'Dallas', price: '$1500/month', category: 'digital', image: '✈️', size: '16x32 ft', description: 'Premium digital space near the airport. Capture the attention of travelers and business professionals.' },
+]

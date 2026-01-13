@@ -64,7 +64,7 @@ const Navbar = () => {
             {/* Navigation Links */}
             <ul className='navbar'>
                 <li onClick={() => {
-                    if (location.pathname === '/') {
+                    if (location.pathname === '/'||location.pathname === '/adlist') {
                         const element = document.getElementById('ad-search-section');
                         if (element) {
                             element.scrollIntoView({ behavior: 'smooth' });

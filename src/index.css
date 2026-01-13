@@ -111,8 +111,8 @@ body {
 
 .user-btn {
   background-color: #fff;
-  border: 1px solid #fff;
-  color: #1e1b4b;
+  border: 1px solid #c5a059;
+  color: #c5a059;
   padding: 0.5rem 1rem;
   margin: 0.2rem;
   border-radius: 15px;
@@ -122,11 +122,20 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  transition: all 0.3s ease;
 }
 
 .user-btn img {
   width: 15px;
   height: 15px;
+}
+
+.user-btn:hover {
+  cursor: pointer;
+  background-color: #c5a059;
+  
+  box-shadow: 0 0 10px rgba(197, 160, 89, 0.5);
+  transform: scale(1.05);
 }
 
 .navbar li {

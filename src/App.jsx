@@ -4,7 +4,8 @@ import Adlist from './pages/adlist.jsx'
 import Login from './pages/login.jsx'
 import Vendor from './pages/vendor.jsx'
 import Profile from './pages/profile.jsx'
-import Home from './pages/home.jsx' 
+import Home from './pages/home.jsx'
+import AdBoard from './pages/AdBoard.jsx'
 /**
  * Main application component that defines the routing structure.
  */
@@ -23,6 +24,8 @@ function App() {
           <Route path="/vendor" element={<Vendor />} />
           {/* User profile management page */}
           <Route path="/profile" element={<Profile />} />
+          {/* Ad Details Page */}
+          <Route path="/ad/:id" element={<AdBoard />} />
         </Routes>
       </div>
     </>
