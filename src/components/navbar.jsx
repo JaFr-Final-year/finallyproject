@@ -10,18 +10,7 @@ import usericon from '../assets/user.png'
 const Navbar = () => {
     const navigate = useNavigate()
     const location = useLocation()
-    const [searchTerm, setSearchTerm] = useState('')
-    const [showSuggestions, setShowSuggestions] = useState(false)
     const [user, setUser] = useState(null)
-
-    // Predefined list of locations for suggestions
-    const locations = ["New York", "Los Angeles", "Chicago", "Houston", "Phoenix", "Philadelphia", "San Antonio", "San Diego", "Dallas", "San Jose"]
-
-    // Logic to determine which locations to show
-    const isExactMatch = locations.some(loc => loc.toLowerCase() === searchTerm.toLowerCase())
-    const displayedLocations = isExactMatch
-        ? locations
-        : locations.filter(loc => loc.toLowerCase().includes(searchTerm.toLowerCase()))
 
 
     useEffect(() => {
@@ -50,23 +39,7 @@ const Navbar = () => {
         return () => subscription.unsubscribe()
     }, [])
 
-    /**
-     * Handles the input change for location search.
-     * @param {Object} e - Event object 
-     */
-    const handleSearch = (e) => {
-        setSearchTerm(e.target.value)
-        setShowSuggestions(true)
-    }
 
-    /**
-     * Selects a location from the suggestions list.
-     * @param {string} loc - The selected location 
-     */
-    const selectLocation = (loc) => {
-        setSearchTerm(loc)
-        setShowSuggestions(true)
-    }
 
 
 
@@ -88,34 +61,18 @@ const Navbar = () => {
             {/* Clickable Logo */}
             <h1 className='logo' onClick={() => navigate('/')}>SpaceToAd</h1>
 
-            {/* Location Search Input */}
-            <div className='location-search'>
-                <input
-                    type="text"
-                    placeholder="Location"
-                    value={searchTerm}
-                    onChange={handleSearch}
-                    onFocus={() => setShowSuggestions(true)}
-                    // Delay blur to allow click on suggestion to register
-                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                />
-                {showSuggestions && (
-                    <ul className="suggestions-list">
-                        <li className="suggestion-item current-location">
-                            📍 Use Current Location
-                        </li>
-                        {displayedLocations.map((loc, index) => (
-                            <li key={index} className="suggestion-item" onClick={() => selectLocation(loc)}>
-                                {loc}
-                            </li>
-                        ))}
-                    </ul>
-                )}
-            </div>
-
             {/* Navigation Links */}
             <ul className='navbar'>
-                <li onClick={() => navigate('/services')}>Services</li>
+                <li onClick={() => {
+                    if (location.pathname === '/'||location.pathname === '/adlist') {
+                        const element = document.getElementById('ad-search-section');
+                        if (element) {
+                            element.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    } else {
+                        navigate('/adlist');
+                    }
+                }}>Ad listings</li>
                 <li onClick={() => navigate('/about')}>About</li>
                 <li onClick={() => navigate('/contact')}>Contact</li>
             </ul>
@@ -124,7 +81,7 @@ const Navbar = () => {
             <div>
                 {user ? (
                     <div className='nav-right-btn'>
-                        {location.pathname !== '/vendor' && <button className='rentout-btn' onClick={() => navigate('/vendor')}>Rent Out</button>}
+                        {location.pathname !== '/vendor' && <button className='rentout-btn' onClick={() => navigate('/vendor')}>Rent</button>}
                         <button className='user-btn' onClick={() => navigate('/profile')}><img src={usericon} alt="Profile" /></button>
                         <button className='login-btn logout-btn' onClick={handleLogout}><img src={logouticon} alt="Logout" /> </button>
                     </div>
