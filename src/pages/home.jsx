@@ -3,6 +3,7 @@ import Navbar from '../components/navbar'
 import Adlist from './adlist'
 import heroImage from '../assets/hero-image.png'
 import { supabase } from '../utils/supabase'
+import About from './about'
 
 const home = () => {
     const [user, setUser] = useState(null)
@@ -62,6 +63,7 @@ const home = () => {
             </div>
 
             <Adlist />
+            <About />
         </>
     )
 }

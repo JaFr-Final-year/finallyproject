@@ -47,24 +47,32 @@ const Navbar = () => {
      * Handles user logout via Supabase.
      */
     const handleLogout = async () => {
-        const { error } = await supabase.auth.signOut()
-        if (error) {
-            console.error("Error logging out:", error)
-            alert("Error logging out")
-        } else {
-            navigate('/')
+        if (window.confirm("Are you sure you want to logout?")) {
+            const { error } = await supabase.auth.signOut()
+            if (error) {
+                console.error("Error logging out:", error)
+                alert("Error logging out")
+            } else {
+                navigate('/')
+            }
         }
     }
 
     return (
         <div className='nav-container'>
             {/* Clickable Logo */}
-            <h1 className='logo' onClick={() => navigate('/')}>SpaceToAd</h1>
+            <h1 className='logo' onClick={() => {
+                if (location.pathname === '/') {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    navigate('/');
+                }
+            }}>SpaceToAd</h1>
 
             {/* Navigation Links */}
             <ul className='navbar'>
                 <li onClick={() => {
-                    if (location.pathname === '/'||location.pathname === '/adlist') {
+                    if (location.pathname === '/' || location.pathname === '/adlist') {
                         const element = document.getElementById('ad-search-section');
                         if (element) {
                             element.scrollIntoView({ behavior: 'smooth' });
@@ -73,7 +81,16 @@ const Navbar = () => {
                         navigate('/adlist');
                     }
                 }}>Ad listings</li>
-                <li onClick={() => navigate('/about')}>About</li>
+                <li onClick={() => {
+                    if (location.pathname === '/' || location.pathname === '/about') {
+                        const element = document.getElementById('about-section');
+                        if (element) {
+                            element.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    } else {
+                        navigate('/about');
+                    }
+                }}>About</li>
                 <li onClick={() => navigate('/contact')}>Contact</li>
             </ul>
 

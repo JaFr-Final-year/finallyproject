@@ -6,6 +6,7 @@ import Vendor from './pages/vendor.jsx'
 import Profile from './pages/profile.jsx'
 import Home from './pages/home.jsx'
 import AdBoard from './pages/AdBoard.jsx'
+import About from './pages/about.jsx'
 /**
  * Main application component that defines the routing structure.
  */
@@ -26,6 +27,8 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           {/* Ad Details Page */}
           <Route path="/ad/:id" element={<AdBoard />} />
+          {/* About Page */}
+          <Route path="/about" element={<About />} />
         </Routes>
       </div>
     </>

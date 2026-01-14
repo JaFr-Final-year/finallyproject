@@ -76,7 +76,7 @@ const Login = () => {
   };
 
   return (
-    <div className='container'>
+    <div className='container' style={{ paddingTop: 0 }}>
       {/* Clickable logo to return to home */}
       <h1 className='logo ' onClick={() => navigate('/')}>SpaceToAd </h1>
 
