@@ -1,0 +1,77 @@
+# SpaceToAd
+SpaceToAd is a Advertisement Locator that is a location-based application designed to help businesses and individuals to identify, manage, and track advertising opportunities in specific geographic areas. This project provides a digital platform that integrates mapping services with a centralized database of advertisement spaces such as billboards, digital screens, posters, and transit ads. Users can search for available locations, compare visibility metrics, check cost details, and book advertisement slots directly through the system. By combining geolocation technology, database management, and an intuitive interface, the Advertisement Locator offers a smart and efficient solution for maximizing the impact of outdoor and local advertising campaigns.
+
+# 👌Core Features
+- Location-Based Ad Search – Find advertisement spaces using map view and filters
+- Ad Space Categories – Billboards, digital screens, banners, posters, transit ads, shop displays
+- Real-Time Availability Status – Shows whether an ad space is free, booked, or reserved.
+- Price Comparison – Compare multiple ad locations based on cost and duration.
+- Ad Space Details – Size, dimensions, visibility score, lighting, peak hours.
+
+
+## 🛠️ Languages & Technologies Used
+
+### Frontend
+- **HTML5** – Used to structure the web pages.
+- **CSS3** – Used for styling, layout, and responsive design.
+- **JavaScript** – Handles client-side logic and interactivity.
+- **React.js** – Used to build reusable UI components and manage state.
+
+### Backend
+- **Node.js** – Runtime environment for server-side execution.
+- **Flask** – Framework for building RESTful APIs.
+
+### Database
+- **Supabase** – NoSQL database used to store user data, advertisement details, bookings, and locations.
+
+### Authentication
+- **Supabase Authentication / Google OAuth** – Used for secure user login and Google sign-in.
+
+### Maps & Location Services
+- **Google Maps API** – Used to display advertisement locations and enable location-based search.
+
+### Tools & Platforms
+- **Git & GitHub** – Version control and project hosting.
+- **VS Code** – Code editor used for development.
+
+
+## ⚙️ Installation & Setup Guidelines
+
+Follow the steps below to run the project locally.
+
+### 1️⃣ Prerequisites
+
+Make sure you have the following installed:
+- Node.js (v16 or later)
+- npm or yarn
+- Supabase account  
+- Git
+- VS Code (recommended)
+
+### 2️⃣ Clone the Repository
+
+Clone this repository to your local machine using the following command:
+
+```bash
+    git clone https://github.com/your-username/adboardhub.git
+``` 
+
+### 3️⃣ Install Dependencies
+
+Navigate to the project directory and install dependencies:
+
+```bash
+    cd adboardhub
+    npm install
+``` 
+
+    ### 4️⃣ Set Up Environment Variables
+
+Create a `.env` file in the root directory of the project and add the following environment variables:
+
+```bash
+    REACT_APP_API_URL=https://your-api-url.com
+    REACT_APP_SUPABASE_URL=https://your-supabase-url.com
+    REACT_APP_SUPABASE_ANON_KEY=your-supabase-anon-key
+    REACT_APP_SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+``` 
