@@ -1,19 +1,28 @@
 import React, { useState, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/navbar'
+import { supabase } from '../utils/supabase'
 
 /**
  * Vendor page component allowing users to list new advertising spaces.
  * Includes a form with drag-and-drop image upload, proof of ownership, and other details.
  */
 const Vendor = () => {
+    // Hooks
+    const navigate = useNavigate()
+
     // Form state
     const [formData, setFormData] = useState({
+        name: '', // Added name/title
+        category: 'billboard', // Added category with default
         location: '',
         contactNumber: '',
         price: '',
         size: '',
         description: ''
     })
+
+    const [loading, setLoading] = useState(false)
 
     // File state
     const [images, setImages] = useState([])
@@ -80,13 +89,67 @@ const Vendor = () => {
     }
 
     // Form submission handler
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
-        // Here you would typically send data to backend/Supabase
-        console.log("Form Data:", formData)
-        console.log("Images:", images)
-        console.log("Proof:", proofFile)
-        alert("Listing submitted successfully! (Mock)")
+        setLoading(true)
+
+        // Basic validation
+        if (!formData.location || !formData.price || !formData.name) {
+            alert("Please fill in all required fields.")
+            setLoading(false)
+            return
+        }
+
+        try {
+            // Get current user
+            const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+            if (authError || !user) {
+                console.error("Auth Error:", authError)
+                alert("You must be logged in to submit a listing.")
+                setLoading(false)
+                return
+            }
+
+            // Prepare data for insertion
+            const categoryIcons = {
+                billboard: '🏙️',
+                digital: '📺',
+                transit: '🚌',
+                mural: '🎨'
+            }
+
+            const adData = {
+                name: formData.name,
+                location: formData.location,
+                price: formData.price,
+                size: formData.size,
+                description: `${formData.description}\n\nContact Number: ${formData.contactNumber}`,
+                category: formData.category,
+                owner_id: user.id,
+                image: categoryIcons[formData.category] || '📢', // Fallback image/icon
+            }
+
+            const { error } = await supabase
+                .from('ads')
+                .insert([adData])
+
+            if (error) {
+                console.error("Supabase Insert Error:", error)
+                throw error
+            }
+
+            alert("Listing submitted successfully! Redirecting to Ad List...")
+
+            // Redirect to AdList to see the new item
+            navigate('/adlist')
+
+        } catch (error) {
+            console.error("Error submitting listing (Full):", error)
+            alert(`Error submitting listing: ${error.message || "Unknown error"}`)
+        } finally {
+            setLoading(false)
+        }
     }
 
     // Trigger file input click
@@ -102,6 +165,36 @@ const Vendor = () => {
                     <h1 className="vendor-title">List Your Ad Space</h1>
 
                     <form className="vendor-form" onSubmit={handleSubmit}>
+
+                        {/* Ad Title/Name */}
+                        <div className="form-group">
+                            <label>Ad Title</label>
+                            <input
+                                type="text"
+                                name="name"
+                                className="form-input"
+                                placeholder="e.g. Prime Billboard near City Center"
+                                value={formData.name}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+
+                        {/* Category */}
+                        <div className="form-group">
+                            <label>Category</label>
+                            <select
+                                name="category"
+                                className="form-input"
+                                value={formData.category}
+                                onChange={handleChange}
+                            >
+                                <option value="billboard">Billboard</option>
+                                <option value="digital">Digital Screen</option>
+                                <option value="transit">Transit Ad</option>
+                                <option value="mural">Wall Mural</option>
+                            </select>
+                        </div>
 
                         {/* Location */}
                         <div className="form-group">
@@ -137,7 +230,7 @@ const Vendor = () => {
                                     type="text"
                                     name="price"
                                     className="form-input"
-                                    placeholder="e.g. $500"
+                                    placeholder="e.g. ₹500"
                                     value={formData.price}
                                     onChange={handleChange}
                                     required
@@ -235,7 +328,9 @@ const Vendor = () => {
                             />
                         </div>
 
-                        <button type="submit" className="submit-btn">Submit Listing</button>
+                        <button type="submit" className="submit-btn" disabled={loading}>
+                            {loading ? 'Submitting...' : 'Submit Listing'}
+                        </button>
                     </form>
                 </div>
             </div>

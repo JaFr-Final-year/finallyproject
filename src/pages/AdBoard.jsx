@@ -1,19 +1,46 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import './AdBoard.css'
-import { products as allProducts } from './adlist'
+import { supabase } from '../utils/supabase'
 
 const AdBoard = () => {
     const { id } = useParams()
     const [product, setProduct] = useState(null)
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        const foundProduct = allProducts.find(p => p.id === parseInt(id))
-        setProduct(foundProduct)
+        const fetchAd = async () => {
+            try {
+                // Fetch from 'ads' table matching the id
+                const { data, error } = await supabase
+                    .from('ads')
+                    .select('*')
+                    .eq('id', id)
+                    .single()
+
+                if (error) {
+                    console.error("Error fetching ad:", error)
+                } else {
+                    setProduct(data)
+                }
+            } catch (err) {
+                console.error("Unexpected error:", err)
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        if (id) {
+            fetchAd()
+        }
     }, [id])
 
+    if (loading) {
+        return <div className="ad-loading">Loading Ad Details...</div>
+    }
+
     if (!product) {
-        return <div className="ad-loading">Loading or Ad Not Found...</div>
+        return <div className="ad-loading">Ad Not Found</div>
     }
 
     return (
@@ -32,7 +59,7 @@ const AdBoard = () => {
                             <p className="ad-location">📍 {product.location}</p>
                         </div>
                         <div className="ad-price-tag">
-                            {product.price}
+                            {product.price}₹/Month  
                         </div>
                     </div>
 

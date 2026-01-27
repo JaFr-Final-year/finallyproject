@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../utils/supabase'
 
 /**
@@ -6,15 +7,17 @@ import { supabase } from '../utils/supabase'
  * Supports filtering by category and sorting (UI only in this version).
  */
 const AdList = () => {
+  const navigate = useNavigate()
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [sortBy, setSortBy] = useState('newest')
   const [filterCategory, setFilterCategory] = useState('all')
   const [location, setLocation] = useState('')
   const [showSuggestions, setShowSuggestions] = useState(false)
+  const [products, setProducts] = useState([]) // State for products from DB
 
   const openAdDetails = (id) => {
-    window.open(`/ad/${id}`, '_blank')
+    navigate(`/ad/${id}`)
   }
 
   const popularLocations = ['Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai', 'Kolkata', 'Pune', 'Ahmedabad', 'Jaipur', 'Surat']
@@ -35,6 +38,23 @@ const AdList = () => {
     }
   }
 
+  // Fetch products from Supabase
+  const fetchProducts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('ads')
+        .select('*')
+
+      if (error) {
+        console.error('Error fetching ads:', error)
+      } else {
+        setProducts(data || [])
+      }
+    } catch (err) {
+      console.error('Unexpected error fetching ads:', err)
+    }
+  }
+
   useEffect(() => {
     /**
      * Fetches current user session on mount.
@@ -52,6 +72,7 @@ const AdList = () => {
     }
 
     getUser()
+    fetchProducts() // Fetch ads on mount
 
     /**
      * Listens for authentication state changes.
@@ -171,21 +192,24 @@ const AdList = () => {
           {products
             .filter(product => filterCategory === 'all' || product.category === filterCategory)
             .sort((a, b) => {
-              if (sortBy === 'newest') return b.id - a.id;
+              if (sortBy === 'newest') return (b.id || 0) - (a.id || 0); // Handle potentially missing or non-numeric IDs if DB uses UUIDs
+              // Basic price parsing helper since price is text "₹40,000/month"
+              const getPrice = (p) => parseInt(p.price?.replace(/[^0-9]/g, '') || 0);
+
               if (sortBy === 'price-low') {
-                return parseInt(a.price.replace(/[^0-9]/g, '')) - parseInt(b.price.replace(/[^0-9]/g, ''));
+                return getPrice(a) - getPrice(b);
               }
               if (sortBy === 'price-high') {
-                return parseInt(b.price.replace(/[^0-9]/g, '')) - parseInt(a.price.replace(/[^0-9]/g, ''));
+                return getPrice(b) - getPrice(a);
               }
               if (sortBy === 'location') {
-                return a.location.localeCompare(b.location);
+                return (a.location || '').localeCompare(b.location || '');
               }
               return 0;
             })
             .map(product => (
               <div
-                key={product.id}
+                key={product.id || Math.random()} // Fallback key
                 className="product-card"
                 onClick={() => openAdDetails(product.id)}
                 style={{ cursor: 'pointer' }}
@@ -196,7 +220,7 @@ const AdList = () => {
                   <p className="product-location">📍 {product.location}</p>
                   <p className="product-size">📏 {product.size}</p>
                   <div className="product-footer">
-                    <span className="product-price">{product.price}</span>
+                    <span className="product-price">{product.price}₹/Month</span>
                     <button
                       className="view-btn"
                       onClick={(e) => {
@@ -218,31 +242,3 @@ const AdList = () => {
 
 
 export default AdList
-
-// Mock data for advertising products
-export const products = [
-  { id: 1, name: 'Billboard - Western Express Hwy', location: 'Mumbai', price: '₹40,000/month', category: 'billboard', image: '🏙️', size: '14x48 ft', description: 'High visibility billboard on the main highway, perfect for large-scale brand awareness campaigns. Visible to thousands of daily commuters.' },
-  { id: 2, name: 'Digital Screen - Connaught Place', location: 'Delhi', price: '₹1,50,000/month', category: 'digital', image: '📺', size: '20x30 ft', description: 'Bright digital screen in the heart of the city. High engagement and dynamic content capabilities.' },
-  { id: 3, name: 'Bus Stop Ad - Indiranagar', location: 'Bangalore', price: '₹25,000/month', category: 'transit', image: '🚌', size: '4x6 ft', description: 'Target commuters with this bus stop ad. Great for local reach and high frequency exposure.' },
-  { id: 4, name: 'Wall Mural - Park Street', location: 'Kolkata', price: '₹65,000/month', category: 'mural', image: '🎨', size: '30x40 ft', description: 'Artistic wall mural on a busy street. Creates a unique and memorable brand impression.' },
-  { id: 5, name: 'Billboard - SG Highway', location: 'Ahmedabad', price: '₹35,000/month', category: 'billboard', image: '🛣️', size: '14x48 ft', description: 'Classic billboard location on the busy highway. Ideal for travel and tourism related advertisements.' },
-  { id: 6, name: 'Digital Billboard - Airport', location: 'Hyderabad', price: '₹1,20,000/month', category: 'digital', image: '✈️', size: '16x32 ft', description: 'Premium digital space near the airport. Capture the attention of travelers and business professionals.' },
-  { id: 7, name: 'Bus Bench - Marine Drive', location: 'Mumbai', price: '₹20,000/month', category: 'transit', image: '🪑', size: '2x6 ft', description: 'Street-level visibility on famous Marine Drive. Perfect for local targeting.' },
-  { id: 8, name: 'Metro Station Digital', location: 'Delhi', price: '₹1,00,000/month', category: 'digital', image: '🚇', size: '55 inch', description: 'High-traffic metro entrance digital screen. Captive audience during commute.' },
-  { id: 9, name: 'Auto Rickshaw Display', location: 'Chennai', price: '₹30,000/month', category: 'transit', image: '�', size: '1x3 ft', description: 'Mobile advertising throughout the city center. High frequency impressions.' },
-  { id: 10, name: 'Mall Kiosk - Phoenix Marketcity', location: 'Pune', price: '₹50,000/month', category: 'digital', image: '🛍️', size: '4x6 ft', description: 'Interactive kiosk in a major shopping mall. Reach consumers with high purchase intent.' },
-  { id: 11, name: 'Stadium Scoreboard', location: 'Mumbai', price: '₹4,00,000/game', category: 'digital', image: '🏟️', size: '50x100 ft', description: 'Massive exposure during cricket matches and concerts. Unmissable brand impact.' },
-  { id: 12, name: 'Office Lobby Screen', location: 'Bangalore', price: '₹55,000/month', category: 'digital', image: '🏢', size: '65 inch', description: 'Corporate audience targeting in premium tech parks.' },
-  { id: 13, name: 'Highway Billboard - NH8', location: 'Jaipur', price: '₹45,000/month', category: 'billboard', image: '🚗', size: '14x48 ft', description: 'Prime highway location for maximum visibility to vehicle traffic.' },
-  { id: 14, name: 'Street Art Mural', location: 'Kochi', price: '₹90,000/month', category: 'mural', image: '🎭', size: '20x20 ft', description: 'Creative and colorful mural in the arts district. Highly instagrammable.' },
-  { id: 15, name: 'Railway Station Poster', location: 'Lucknow', price: '₹15,000/month', category: 'billboard', image: '🚉', size: '4x6 ft', description: 'High footfall visibility at Main Railway Station platforms.' },
-  { id: 16, name: 'Cinema Hall Slide', location: 'Chandigarh', price: '₹10,000/week', category: 'digital', image: '🍿', size: 'Screen', description: 'On-screen advertising before blockbuster movies. Captive audience.' },
-  { id: 17, name: 'IT Park Food Court', location: 'Hyderabad', price: '₹75,000/month', category: 'billboard', image: '🍽️', size: '6x4 ft', description: 'Standee placement in busy food courts of Hitech City. Targets professionals.' },
-  { id: 18, name: 'Toll Plaza Gantry', location: 'Gurgaon', price: '₹2,50,000/month', category: 'billboard', image: '🚧', size: '80x20 ft', description: 'Massive gantry structure over the expressway toll plaza. 100% visibility to passing traffic.' },
-  { id: 19, name: 'Bus Shelter Branding', location: 'Trivandrum', price: '₹22,000/month', category: 'transit', image: '🚏', size: 'Full Shelter', description: 'Complete branding of a bus shelter in the city center.' },
-  { id: 20, name: 'Unipole Hoarding', location: 'Indore', price: '₹60,000/month', category: 'billboard', image: '🚩', size: '20x10 ft', description: 'Prominent unipole at a major traffic junction.' },
-  { id: 21, name: 'Metro Pillar Branding', location: 'Nagpur', price: '₹40,000/month', category: 'billboard', image: '🚇', size: 'Pillar Wrap', description: 'Eye-catching wrap around metro pillars on main roads.' },
-  { id: 22, name: 'Airport Baggage Claim', location: 'Goa', price: '₹1,80,000/month', category: 'digital', image: '🧳', size: 'Digital Screen', description: 'Digital screens on baggage belts. High dwell time for tourists.' },
-  { id: 23, name: 'Lift Branding', location: 'Noida', price: '₹12,000/month', category: 'billboard', image: '↕️', size: 'Door Wrap', description: 'Internal and external lift door branding in corporate towers.' },
-  { id: 24, name: 'Society Gate Sponsorship', location: 'Pune', price: '₹18,000/month', category: 'billboard', image: '🏡', size: 'Gate Arch', description: 'Branding at the entrance arch of premium residential societies.' },
-]

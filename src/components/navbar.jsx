@@ -91,7 +91,7 @@ const Navbar = () => {
                         navigate('/about');
                     }
                 }}>About</li>
-                <li onClick={() => navigate('/contact')}>Contact</li>
+                <li onClick={() => window.location.href = 'mailto:finallyproject5@gmail.com'}>Contact</li>
             </ul>
 
             {/* User Auth/Profile section */}
