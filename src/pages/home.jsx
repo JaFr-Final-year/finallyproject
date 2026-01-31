@@ -31,11 +31,28 @@ const home = () => {
         return () => subscription.unsubscribe()
     }, [])
 
+    useEffect(() => {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                } else {
+                    entry.target.classList.remove('active');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        const elements = document.querySelectorAll('.scroll-reveal');
+        elements.forEach((el) => observer.observe(el));
+
+        return () => elements.forEach((el) => observer.unobserve(el));
+    }, [loading]); // Re-run when loading finishes so elements are in DOM
+
     return (
         <>
             <Navbar />
 
-            <div className="home-container" style={{ paddingBottom: 0 }}>
+            <div className="home-container scroll-reveal" style={{ paddingBottom: 0 }}>
                 {/* Personalized welcome message */}
                 {!loading && user && (
                     <h1 className="welcome-text" style={{ marginTop: '2rem' }}>Welcome, {user.user_metadata?.name || user.email}</h1>
@@ -45,7 +62,7 @@ const home = () => {
                 )}
             </div>
 
-            <div className="hero-section">
+            <div className="hero-section scroll-reveal scroll-reveal-delay-1">
                 <div className="hero-content">
                     <h1 className="hero-title">
                         Search, Plan & Book <br />
@@ -62,8 +79,12 @@ const home = () => {
                 </div>
             </div>
 
-            <Adlist />
-            <About />
+            <div className="scroll-reveal scroll-reveal-delay-2">
+                <Adlist />
+            </div>
+            <div className="scroll-reveal scroll-reveal-delay-3">
+                <About />
+            </div>
         </>
     )
 }

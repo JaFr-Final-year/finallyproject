@@ -15,6 +15,7 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [spotlightOpacity, setSpotlightOpacity] = useState(1);
 
   /**
    * Handles the authentication process (sign-up or sign-in) based on the current state.
@@ -75,15 +76,49 @@ const Login = () => {
     }
   };
 
+  const handleMouseMove = (e) => {
+    const container = e.currentTarget;
+    const rect = container.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    container.style.setProperty('--mouse-x', `${x}px`);
+    container.style.setProperty('--mouse-y', `${y}px`);
+  };
+
+  React.useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+        } else {
+          entry.target.classList.remove('active');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    const elements = document.querySelectorAll('.scroll-reveal');
+    elements.forEach((el) => observer.observe(el));
+
+    return () => elements.forEach((el) => observer.unobserve(el));
+  }, []);
+
   return (
-    <div className='container' style={{ paddingTop: 0 }}>
+    <div
+      className='auth-page-container'
+      onMouseMove={handleMouseMove}
+      style={{ '--spotlight-opacity': spotlightOpacity }}
+    >
       {/* Clickable logo to return to home */}
-      <h1 className='logo ' onClick={() => navigate('/')}>SpaceToAd </h1>
+      <h1 className='logo scroll-reveal' onClick={() => navigate('/')}>SpaceToAd </h1>
 
       <div className='login-container'>
-        <h2 className='login-title'>{state === 'sign up' ? 'Sign up' : 'Login'}</h2>
+        <h2 className='login-title scroll-reveal'>{state === 'sign up' ? 'Sign up' : 'Login'}</h2>
 
-        <div className='login-card'>
+        <div
+          className='login-card scroll-reveal scroll-reveal-delay-1'
+          onMouseEnter={() => setSpotlightOpacity(0)}
+          onMouseLeave={() => setSpotlightOpacity(1)}
+        >
           <p className='login-name'>{state === 'sign up' ? 'Create Your Account' : 'Login To Your Account'}</p>
 
           {/* Display authentication errors if any */}

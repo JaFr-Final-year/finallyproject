@@ -37,6 +37,23 @@ const Profile = () => {
     getProfile()
   }, [])
 
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+        } else {
+          entry.target.classList.remove('active');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    const elements = document.querySelectorAll('.scroll-reveal');
+    elements.forEach((el) => observer.observe(el));
+
+    return () => elements.forEach((el) => observer.unobserve(el));
+  }, [loading]);
+
   if (loading) {
     return (
       <div>
@@ -65,7 +82,7 @@ const Profile = () => {
       <div className="profile-page-container">
 
         {/* 1. User Details Container */}
-        <div className="profile-header-card">
+        <div className="profile-header-card scroll-reveal">
           <div className="profile-avatar">
             {user.user_metadata?.name ? user.user_metadata.name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
           </div>
@@ -81,7 +98,7 @@ const Profile = () => {
         <div className="profile-content-split">
 
           {/* Left: Rent Out Details (My Listings) */}
-          <div className="profile-section">
+          <div className="profile-section scroll-reveal scroll-reveal-delay-1">
             <h2>Rent Out Details (My Listings)</h2>
             {myListings.length > 0 ? (
               <div className="listings-list">
@@ -106,7 +123,7 @@ const Profile = () => {
           </div>
 
           {/* Right: Paid Rent Details (My Bookings) */}
-          <div className="profile-section">
+          <div className="profile-section scroll-reveal scroll-reveal-delay-2">
             <h2>Paid Rent Details (My Bookings)</h2>
             {myBookings.length > 0 ? (
               <div className="bookings-list">

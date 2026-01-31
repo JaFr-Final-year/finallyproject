@@ -84,13 +84,31 @@ const AdList = () => {
     return () => subscription.unsubscribe()
   }, [])
 
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+        } else {
+          entry.target.classList.remove('active');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    const elements = document.querySelectorAll('.scroll-reveal');
+    elements.forEach((el) => observer.observe(el));
+
+    return () => elements.forEach((el) => observer.unobserve(el));
+  }, [products]); // Re-run when products are loaded
+
   return (
     <div>
       <div className="home-container" id="ad-search-section">
 
 
         {/* Custom Search Bar */}
-        <div className="search-bar-container">
+        <h2 className="search-heading scroll-reveal">Find Your Board</h2>
+        <div className="search-bar-container scroll-reveal">
           <div className="search-input-group" style={{ position: 'relative' }}>
             <div className="search-icon-wrapper">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="search-icon-svg"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg>
@@ -156,7 +174,7 @@ const AdList = () => {
         </div>
 
         {/* Filter and Sort UI Controls */}
-        <div className="filter-sort-container">
+        <div className="filter-sort-container scroll-reveal">
           <div className="filter-section">
             <label>Filter by Category:</label>
             <select
@@ -207,10 +225,10 @@ const AdList = () => {
               }
               return 0;
             })
-            .map(product => (
+            .map((product, index) => (
               <div
                 key={product.id || Math.random()} // Fallback key
-                className="product-card"
+                className={`product-card scroll-reveal scroll-reveal-delay-${(index % 3) + 1}`}
                 onClick={() => openAdDetails(product.id)}
                 style={{ cursor: 'pointer' }}
               >

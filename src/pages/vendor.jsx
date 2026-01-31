@@ -157,17 +157,34 @@ const Vendor = () => {
         imageInputRef.current.click()
     }
 
+    React.useEffect(() => {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                } else {
+                    entry.target.classList.remove('active');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        const elements = document.querySelectorAll('.scroll-reveal');
+        elements.forEach((el) => observer.observe(el));
+
+        return () => elements.forEach((el) => observer.unobserve(el));
+    }, []);
+
     return (
         <div>
             <Navbar />
             <div className="container">
-                <div className="vendor-container">
+                <div className="vendor-container scroll-reveal">
                     <h1 className="vendor-title">List Your Ad Space</h1>
 
                     <form className="vendor-form" onSubmit={handleSubmit}>
 
                         {/* Ad Title/Name */}
-                        <div className="form-group">
+                        <div className="form-group full-width centered-group scroll-reveal scroll-reveal-delay-1">
                             <label>Ad Title</label>
                             <input
                                 type="text"
@@ -181,7 +198,7 @@ const Vendor = () => {
                         </div>
 
                         {/* Category */}
-                        <div className="form-group">
+                        <div className="form-group scroll-reveal scroll-reveal-delay-2">
                             <label>Category</label>
                             <select
                                 name="category"
@@ -197,7 +214,7 @@ const Vendor = () => {
                         </div>
 
                         {/* Location */}
-                        <div className="form-group">
+                        <div className="form-group scroll-reveal scroll-reveal-delay-3">
                             <label>Location</label>
                             <input
                                 type="text"
@@ -210,50 +227,39 @@ const Vendor = () => {
                             />
                         </div>
 
-                        {/* Size and Price */}
-                        <div style={{ display: 'flex', gap: '1rem' }}>
-                            <div className="form-group" style={{ flex: 1 }}>
-                                <label>Size (Dimensions)</label>
-                                <input
-                                    type="text"
-                                    name="size"
-                                    className="form-input"
-                                    placeholder="e.g. 14x48 ft"
-                                    value={formData.size}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
-                            <div className="form-group" style={{ flex: 1 }}>
-                                <label>Price per Month</label>
-                                <input
-                                    type="text"
-                                    name="price"
-                                    className="form-input"
-                                    placeholder="e.g. ₹500"
-                                    value={formData.price}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
+                        {/* Size (Dimensions) */}
+                        <div className="form-group scroll-reveal">
+                            <label>Size (Dimensions)</label>
+                            <input
+                                type="text"
+                                name="size"
+                                className="form-input"
+                                placeholder="e.g. 14x48 ft"
+                                value={formData.size}
+                                onChange={handleChange}
+                                required
+                            />
                         </div>
 
-                        {/* Description */}
-                        <div className="form-group">
-                            <label>Description</label>
-                            <textarea
-                                name="description"
+                        {/* Price per Month */}
+                        <div className="form-group scroll-reveal">
+                            <label>Price per Month</label>
+                            <input
+                                type="text"
+                                name="price"
                                 className="form-input"
-                                placeholder="Describe your ad space (visibility, traffic, etc.)"
-                                rows="4"
-                                value={formData.description}
+                                placeholder="e.g. ₹500"
+                                value={formData.price}
                                 onChange={handleChange}
-                                style={{ resize: 'vertical' }}
-                            ></textarea>
+                                required
+                            />
                         </div>
+
+                        {/* Spacer to push Contact Number to the right */}
+                        <div className="spacer-group"></div>
 
                         {/* Contact Number */}
-                        <div className="form-group">
+                        <div className="form-group scroll-reveal">
                             <label>Contact Number</label>
                             <input
                                 type="tel"
@@ -266,8 +272,22 @@ const Vendor = () => {
                             />
                         </div>
 
+                        {/* Description */}
+                        <div className="form-group full-width scroll-reveal">
+                            <label>Description</label>
+                            <textarea
+                                name="description"
+                                className="form-input"
+                                placeholder="Describe your ad space (visibility, traffic, etc.)"
+                                rows="4"
+                                value={formData.description}
+                                onChange={handleChange}
+                                style={{ resize: 'vertical' }}
+                            ></textarea>
+                        </div>
+
                         {/* Drag & Drop Image Upload */}
-                        <div className="form-group">
+                        <div className="form-group full-width scroll-reveal">
                             <label>Upload Images</label>
                             <div
                                 className={`drop-zone ${dragActive ? 'drag-active' : ''}`}
@@ -309,7 +329,7 @@ const Vendor = () => {
                         </div>
 
                         {/* Proof of Ownership */}
-                        <div className="form-group">
+                        <div className="form-group full-width scroll-reveal">
                             <label>Proof of Ownership (Document)</label>
                             <div
                                 className="form-input"
@@ -328,9 +348,11 @@ const Vendor = () => {
                             />
                         </div>
 
-                        <button type="submit" className="submit-btn" disabled={loading}>
-                            {loading ? 'Submitting...' : 'Submit Listing'}
-                        </button>
+                        <div className="full-width scroll-reveal">
+                            <button type="submit" className="submit-btn" style={{ width: '100%' }} disabled={loading}>
+                                {loading ? 'Submitting...' : 'Submit Listing'}
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
