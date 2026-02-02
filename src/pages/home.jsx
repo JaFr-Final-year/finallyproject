@@ -74,7 +74,21 @@ const home = () => {
                     </p>
 
                 </div>
-                <div className="hero-image-container">
+                <div
+                    className="hero-image-container"
+                    onMouseMove={(e) => {
+                        const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+                        const x = ((e.clientX - left) / width) * 100;
+                        const y = ((e.clientY - top) / height) * 100;
+                        e.currentTarget.style.setProperty('--mouse-x', `${x}%`);
+                        e.currentTarget.style.setProperty('--mouse-y', `${y}%`);
+                    }}
+                    style={{ '--mouse-x': '50%', '--mouse-y': '50%' }}
+                >
+                    <div className="corner-bracket top-left"></div>
+                    <div className="corner-bracket top-right"></div>
+                    <div className="corner-bracket bottom-left"></div>
+                    <div className="corner-bracket bottom-right"></div>
                     <img src={heroImage} alt="AdBoard Illustration" className="hero-image" />
                 </div>
             </div>

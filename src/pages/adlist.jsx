@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../utils/supabase'
 
 /**
- * Home page component that displays available advertising spaces.
- * Supports filtering by category and sorting (UI only in this version).
+ * AdList component that displays available advertising spaces.
+ * Supports filtering by category and sorting with custom dropdowns.
  */
 const AdList = () => {
   const navigate = useNavigate()
@@ -14,7 +14,11 @@ const AdList = () => {
   const [filterCategory, setFilterCategory] = useState('all')
   const [location, setLocation] = useState('')
   const [showSuggestions, setShowSuggestions] = useState(false)
-  const [products, setProducts] = useState([]) // State for products from DB
+  const [products, setProducts] = useState([])
+
+  // State for Custom Dropdowns
+  const [filterOpen, setFilterOpen] = useState(false)
+  const [sortOpen, setSortOpen] = useState(false)
 
   const openAdDetails = (id) => {
     navigate(`/ad/${id}`)
@@ -56,9 +60,6 @@ const AdList = () => {
   }
 
   useEffect(() => {
-    /**
-     * Fetches current user session on mount.
-     */
     const getUser = async () => {
       try {
         const { data, error } = await supabase.auth.getSession()
@@ -72,11 +73,8 @@ const AdList = () => {
     }
 
     getUser()
-    fetchProducts() // Fetch ads on mount
+    fetchProducts()
 
-    /**
-     * Listens for authentication state changes.
-     */
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
     })
@@ -99,13 +97,36 @@ const AdList = () => {
     elements.forEach((el) => observer.observe(el));
 
     return () => elements.forEach((el) => observer.unobserve(el));
-  }, [products]); // Re-run when products are loaded
+  }, [products]);
+
+  // Close dropdowns on click outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest('.filter-section')) setFilterOpen(false);
+      if (!e.target.closest('.sort-section')) setSortOpen(false);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const categories = [
+    { label: 'All Categories', value: 'all' },
+    { label: 'Billboard', value: 'billboard' },
+    { label: 'Digital Screen', value: 'digital' },
+    { label: 'Transit Ads', value: 'transit' },
+    { label: 'Wall Murals', value: 'mural' }
+  ];
+
+  const sortOptions = [
+    { label: 'Newest First', value: 'newest' },
+    { label: 'Price: Low to High', value: 'price-low' },
+    { label: 'Price: High to Low', value: 'price-high' },
+    { label: 'Location', value: 'location' }
+  ];
 
   return (
     <div>
       <div className="home-container" id="ad-search-section">
-
-
         {/* Custom Search Bar */}
         <h2 className="search-heading scroll-reveal">Find Your Board</h2>
         <div className="search-bar-container scroll-reveal">
@@ -177,31 +198,50 @@ const AdList = () => {
         <div className="filter-sort-container scroll-reveal">
           <div className="filter-section">
             <label>Filter by Category:</label>
-            <select
-              className="filter-select"
-              value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
+            <div
+              className={`custom-select-trigger ${filterOpen ? 'active' : ''}`}
+              onClick={() => setFilterOpen(!filterOpen)}
             >
-              <option value="all">All Categories</option>
-              <option value="billboard">Billboard</option>
-              <option value="digital">Digital Screen</option>
-              <option value="transit">Transit Ads</option>
-              <option value="mural">Wall Murals</option>
-            </select>
+              {categories.find(c => c.value === filterCategory)?.label}
+            </div>
+            <div className={`custom-options ${filterOpen ? 'active' : ''}`}>
+              {categories.map((cat) => (
+                <div
+                  key={cat.value}
+                  className={`custom-option ${filterCategory === cat.value ? 'selected' : ''}`}
+                  onClick={() => {
+                    setFilterCategory(cat.value);
+                    setFilterOpen(false);
+                  }}
+                >
+                  {cat.label}
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="sort-section">
             <label>Sort by:</label>
-            <select
-              className="sort-select"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
+            <div
+              className={`custom-select-trigger ${sortOpen ? 'active' : ''}`}
+              onClick={() => setSortOpen(!sortOpen)}
             >
-              <option value="newest">Newest First</option>
-              <option value="price-low">Price: Low to High</option>
-              <option value="price-high">Price: High to Low</option>
-              <option value="location">Location</option>
-            </select>
+              {sortOptions.find(o => o.value === sortBy)?.label}
+            </div>
+            <div className={`custom-options ${sortOpen ? 'active' : ''}`}>
+              {sortOptions.map((option) => (
+                <div
+                  key={option.value}
+                  className={`custom-option ${sortBy === option.value ? 'selected' : ''}`}
+                  onClick={() => {
+                    setSortBy(option.value);
+                    setSortOpen(false);
+                  }}
+                >
+                  {option.label}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -210,24 +250,17 @@ const AdList = () => {
           {products
             .filter(product => filterCategory === 'all' || product.category === filterCategory)
             .sort((a, b) => {
-              if (sortBy === 'newest') return (b.id || 0) - (a.id || 0); // Handle potentially missing or non-numeric IDs if DB uses UUIDs
-              // Basic price parsing helper since price is text "₹40,000/month"
-              const getPrice = (p) => parseInt(p.price?.replace(/[^0-9]/g, '') || 0);
+              if (sortBy === 'newest') return (b.id || 0) - (a.id || 0);
+              const getPrice = (p) => parseInt(p.price?.toString().replace(/[^0-9]/g, '') || 0);
 
-              if (sortBy === 'price-low') {
-                return getPrice(a) - getPrice(b);
-              }
-              if (sortBy === 'price-high') {
-                return getPrice(b) - getPrice(a);
-              }
-              if (sortBy === 'location') {
-                return (a.location || '').localeCompare(b.location || '');
-              }
+              if (sortBy === 'price-low') return getPrice(a) - getPrice(b);
+              if (sortBy === 'price-high') return getPrice(b) - getPrice(a);
+              if (sortBy === 'location') return (a.location || '').localeCompare(b.location || '');
               return 0;
             })
             .map((product, index) => (
               <div
-                key={product.id || Math.random()} // Fallback key
+                key={product.id || Math.random()}
                 className={`product-card scroll-reveal scroll-reveal-delay-${(index % 3) + 1}`}
                 onClick={() => openAdDetails(product.id)}
                 style={{ cursor: 'pointer' }}
@@ -242,7 +275,7 @@ const AdList = () => {
                     <button
                       className="view-btn"
                       onClick={(e) => {
-                        e.stopPropagation(); // Prevent double trigger if button is clicked
+                        e.stopPropagation();
                         openAdDetails(product.id);
                       }}
                     >
@@ -257,6 +290,5 @@ const AdList = () => {
     </div>
   );
 }
-
 
 export default AdList
