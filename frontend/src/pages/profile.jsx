@@ -86,7 +86,7 @@ const Profile = () => {
             {user.user_metadata?.name ? user.user_metadata.name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
           </div>
           <div className="profile-info">
-            <h1>{user.user_metadata?.name || 'User'}</h1>
+            <h1>{user.full_name || user.user_metadata?.name || 'User'}</h1>
             <p><strong>Email:</strong> {user.email}</p>
             <p><strong>Member ID:</strong> {user.id.slice(0, 8)}...</p>
             {/* Password is intentionally excluded */}

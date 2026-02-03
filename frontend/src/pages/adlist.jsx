@@ -55,9 +55,6 @@ const AdList = () => {
   }
 
   useEffect(() => {
-    /**
-     * Fetches current user session on mount.
-     */
     const getUser = async () => {
       try {
         const { data, error } = await supabase.auth.getSession()
@@ -73,9 +70,6 @@ const AdList = () => {
     getUser()
     fetchProducts() // Fetch ads on mount
 
-    /**
-     * Listens for authentication state changes.
-     */
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
     })
@@ -189,11 +183,15 @@ const AdList = () => {
         {/* Dynamic Product Grid */}
         <div className="products-grid">
           {products
-            .filter(product => filterCategory === 'all' || product.category === filterCategory)
+            .filter(product => (product.status === 'active' || !product.status || (user && product.owner_id === user.id)) && (filterCategory === 'all' || product.category === filterCategory))
             .sort((a, b) => {
-              if (sortBy === 'newest') return (b.id || 0) - (a.id || 0); // Handle potentially missing or non-numeric IDs if DB uses UUIDs
+              if (sortBy === 'newest') return new Date(b.created_at || 0) - new Date(a.created_at || 0);
               // Basic price parsing helper since price is text "₹40,000/month"
-              const getPrice = (p) => parseInt(p.price?.replace(/[^0-9]/g, '') || 0);
+              // Helper to safely parse price (handles string "₹40,000" or number 40000)
+              const getPrice = (p) => {
+                if (typeof p.price === 'number') return p.price;
+                return parseInt(p.price?.toString().replace(/[^0-9]/g, '') || 0);
+              };
 
               if (sortBy === 'price-low') {
                 return getPrice(a) - getPrice(b);
@@ -208,9 +206,9 @@ const AdList = () => {
             })
             .map(product => (
               <div
-                key={product.id || Math.random()} // Fallback key
+                key={product._id || product.id || Math.random()}
                 className="product-card"
-                onClick={() => openAdDetails(product.id)}
+                onClick={() => openAdDetails(product._id || product.id)}
                 style={{ cursor: 'pointer' }}
               >
                 <div className="product-image">{product.image}</div>
@@ -219,12 +217,12 @@ const AdList = () => {
                   <p className="product-location">📍 {product.location}</p>
                   <p className="product-size">📏 {product.size}</p>
                   <div className="product-footer">
-                    <span className="product-price">{product.price}₹/Month</span>
+                    <span className="product-price">{product.price || 0}₹/Month</span>
                     <button
                       className="view-btn"
                       onClick={(e) => {
                         e.stopPropagation(); // Prevent double trigger if button is clicked
-                        openAdDetails(product.id);
+                        openAdDetails(product._id || product.id);
                       }}
                     >
                       View Details

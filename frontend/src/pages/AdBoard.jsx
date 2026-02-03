@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import './AdBoard.css'
-import { supabase } from '../utils/supabase'
+// import { supabase } from '../utils/supabase'
 
 const AdBoard = () => {
     const { id } = useParams()
@@ -11,15 +11,11 @@ const AdBoard = () => {
     useEffect(() => {
         const fetchAd = async () => {
             try {
-                // Fetch from 'ads' table matching the id
-                const { data, error } = await supabase
-                    .from('ads')
-                    .select('*')
-                    .eq('id', id)
-                    .single()
+                const response = await fetch(`http://localhost:5000/api/ads/${id}`);
+                const data = await response.json();
 
-                if (error) {
-                    console.error("Error fetching ad:", error)
+                if (!response.ok) {
+                    console.error("Error fetching ad:", data.error)
                 } else {
                     setProduct(data)
                 }
@@ -59,7 +55,7 @@ const AdBoard = () => {
                             <p className="ad-location">📍 {product.location}</p>
                         </div>
                         <div className="ad-price-tag">
-                            {product.price}₹/Month  
+                            {product.price}₹/Month
                         </div>
                     </div>
 

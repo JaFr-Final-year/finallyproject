@@ -38,7 +38,7 @@ const home = () => {
             <div className="home-container" style={{ paddingBottom: 0 }}>
                 {/* Personalized welcome message */}
                 {!loading && user && (
-                    <h1 className="welcome-text" style={{ marginTop: '2rem' }}>Welcome, {user.user_metadata?.name || user.email}</h1>
+                    <h1 className="welcome-text" style={{ marginTop: '2rem' }}>Welcome, {user.full_name || user.user_metadata?.name || user.email}</h1>
                 )}
                 {!loading && !user && (
                     <h1 className="welcome-text" style={{ marginTop: '2rem' }}>Explore Ad Spaces</h1>

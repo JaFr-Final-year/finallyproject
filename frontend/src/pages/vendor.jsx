@@ -106,36 +106,30 @@ const Vendor = () => {
 
             if (authError || !user) {
                 console.error("Auth Error:", authError)
-                alert("You must be logged in to submit a listing.")
+                alert("Please login")
                 setLoading(false)
                 return
             }
 
-            // Prepare data for insertion
-            const categoryIcons = {
-                billboard: '🏙️',
-                digital: '📺',
-                transit: '🚌',
-                mural: '🎨'
-            }
-
+            // Prepare data for insertion (TEXT ONLY, JSON)
             const adData = {
-                name: formData.name,
+                title: formData.name, // User snippet uses 'title', mapping from form 'name'
+                name: formData.name,  // Sending 'name' too just in case
                 location: formData.location,
-                price: formData.price,
+                price: formData.price, // Backend handles Number conversion
                 size: formData.size,
                 description: `${formData.description}\n\nContact Number: ${formData.contactNumber}`,
                 category: formData.category,
-                owner_id: user.id,
-                image: categoryIcons[formData.category] || '📢', // Fallback image/icon
+                owner_id: user.id, // Mapping user.id to owner_id
+                image: '📢', // Default icon since file upload is not supported in JSON mode
             }
 
-            const response = await fetch('http://localhost:5000/api/ads', {
-                method: 'POST',
+            const response = await fetch("http://localhost:5000/api/ads", {
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json"
                 },
-                body: JSON.stringify(adData),
+                body: JSON.stringify(adData)
             })
 
             if (!response.ok) {
@@ -146,7 +140,7 @@ const Vendor = () => {
 
             alert("Listing submitted successfully! Redirecting to Ad List...")
 
-            // Redirect to AdList to see the new item
+            // Redirect to AdList
             navigate('/adlist')
 
         } catch (error) {

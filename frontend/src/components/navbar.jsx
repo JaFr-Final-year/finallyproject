@@ -14,9 +14,6 @@ const Navbar = () => {
 
 
     useEffect(() => {
-        /**
-         * Fetches the current user session on component mount.
-         */
         const getUser = async () => {
             const { data, error } = await supabase.auth.getSession()
             if (!error && data?.session) {
@@ -28,14 +25,10 @@ const Navbar = () => {
 
         getUser()
 
-        /**
-         * Subscribes to authentication state changes (login, logout, etc.)
-         */
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             setUser(session?.user ?? null)
         })
 
-        // Unsubscribe from auth listener on component unmount
         return () => subscription.unsubscribe()
     }, [])
 
