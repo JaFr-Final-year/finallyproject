@@ -3,18 +3,22 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../utils/supabase'
 
 /**
- * Home page component that displays available advertising spaces.
- * Supports filtering by category and sorting (UI only in this version).
+ * AdList component that displays available advertising spaces.
+ * Supports filtering by category and sorting with custom dropdowns.
  */
 const AdList = () => {
   const navigate = useNavigate()
   const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
+
   const [sortBy, setSortBy] = useState('newest')
   const [filterCategory, setFilterCategory] = useState('all')
   const [location, setLocation] = useState('')
   const [showSuggestions, setShowSuggestions] = useState(false)
-  const [products, setProducts] = useState([]) // State for products from DB
+  const [products, setProducts] = useState([])
+
+  // State for Custom Dropdowns
+  const [filterOpen, setFilterOpen] = useState(false)
+  const [sortOpen, setSortOpen] = useState(false)
 
   const openAdDetails = (id) => {
     navigate(`/ad/${id}`)
@@ -25,7 +29,7 @@ const AdList = () => {
   const handleCurrentLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
+        () => {
           setLocation("Current Location")
         },
         (error) => {
@@ -38,19 +42,20 @@ const AdList = () => {
     }
   }
 
-  // Fetch products from Backend API
+  // Fetch products from Supabase
   const fetchProducts = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/ads');
+      const { data, error } = await supabase
+        .from('ads')
+        .select('*')
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (error) {
+        console.error('Error fetching ads:', error)
+      } else {
+        setProducts(data || [])
       }
-
-      const data = await response.json();
-      setProducts(data || []);
     } catch (err) {
-      console.error('Error fetching ads from backend:', err);
+      console.error('Unexpected error fetching ads:', err)
     }
   }
 
@@ -63,7 +68,7 @@ const AdList = () => {
       } catch (error) {
         console.error('Error fetching session:', error.message)
       } finally {
-        setLoading(false)
+
       }
     }
 
@@ -77,13 +82,54 @@ const AdList = () => {
     return () => subscription.unsubscribe()
   }, [])
 
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+        } else {
+          entry.target.classList.remove('active');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    const elements = document.querySelectorAll('.scroll-reveal');
+    elements.forEach((el) => observer.observe(el));
+
+    return () => elements.forEach((el) => observer.unobserve(el));
+  }, [products]);
+
+  // Close dropdowns on click outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest('.filter-section')) setFilterOpen(false);
+      if (!e.target.closest('.sort-section')) setSortOpen(false);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const categories = [
+    { label: 'All Categories', value: 'all' },
+    { label: 'Billboard', value: 'billboard' },
+    { label: 'Digital Screen', value: 'digital' },
+    { label: 'Transit Ads', value: 'transit' },
+    { label: 'Wall Murals', value: 'mural' }
+  ];
+
+  const sortOptions = [
+    { label: 'Newest First', value: 'newest' },
+    { label: 'Price: Low to High', value: 'price-low' },
+    { label: 'Price: High to Low', value: 'price-high' },
+    { label: 'Location', value: 'location' }
+  ];
+
   return (
     <div>
       <div className="home-container" id="ad-search-section">
-
-
         {/* Custom Search Bar */}
-        <div className="search-bar-container">
+        <h2 className="search-heading scroll-reveal">Find Your Board</h2>
+        <div className="search-bar-container scroll-reveal">
           <div className="search-input-group" style={{ position: 'relative' }}>
             <div className="search-icon-wrapper">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="search-icon-svg"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg>
@@ -149,34 +195,53 @@ const AdList = () => {
         </div>
 
         {/* Filter and Sort UI Controls */}
-        <div className="filter-sort-container">
+        <div className="filter-sort-container scroll-reveal">
           <div className="filter-section">
             <label>Filter by Category:</label>
-            <select
-              className="filter-select"
-              value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
+            <div
+              className={`custom-select-trigger ${filterOpen ? 'active' : ''}`}
+              onClick={() => setFilterOpen(!filterOpen)}
             >
-              <option value="all">All Categories</option>
-              <option value="billboard">Billboard</option>
-              <option value="digital">Digital Screen</option>
-              <option value="transit">Transit Ads</option>
-              <option value="mural">Wall Murals</option>
-            </select>
+              {categories.find(c => c.value === filterCategory)?.label}
+            </div>
+            <div className={`custom-options ${filterOpen ? 'active' : ''}`}>
+              {categories.map((cat) => (
+                <div
+                  key={cat.value}
+                  className={`custom-option ${filterCategory === cat.value ? 'selected' : ''}`}
+                  onClick={() => {
+                    setFilterCategory(cat.value);
+                    setFilterOpen(false);
+                  }}
+                >
+                  {cat.label}
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="sort-section">
             <label>Sort by:</label>
-            <select
-              className="sort-select"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
+            <div
+              className={`custom-select-trigger ${sortOpen ? 'active' : ''}`}
+              onClick={() => setSortOpen(!sortOpen)}
             >
-              <option value="newest">Newest First</option>
-              <option value="price-low">Price: Low to High</option>
-              <option value="price-high">Price: High to Low</option>
-              <option value="location">Location</option>
-            </select>
+              {sortOptions.find(o => o.value === sortBy)?.label}
+            </div>
+            <div className={`custom-options ${sortOpen ? 'active' : ''}`}>
+              {sortOptions.map((option) => (
+                <div
+                  key={option.value}
+                  className={`custom-option ${sortBy === option.value ? 'selected' : ''}`}
+                  onClick={() => {
+                    setSortBy(option.value);
+                    setSortOpen(false);
+                  }}
+                >
+                  {option.label}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -185,35 +250,32 @@ const AdList = () => {
           {products
             .filter(product => (product.status === 'active' || !product.status || (user && product.owner_id === user.id)) && (filterCategory === 'all' || product.category === filterCategory))
             .sort((a, b) => {
-              if (sortBy === 'newest') return new Date(b.created_at || 0) - new Date(a.created_at || 0);
-              // Basic price parsing helper since price is text "₹40,000/month"
-              // Helper to safely parse price (handles string "₹40,000" or number 40000)
               const getPrice = (p) => {
                 if (typeof p.price === 'number') return p.price;
                 return parseInt(p.price?.toString().replace(/[^0-9]/g, '') || 0);
               };
 
-              if (sortBy === 'price-low') {
-                return getPrice(a) - getPrice(b);
-              }
-              if (sortBy === 'price-high') {
-                return getPrice(b) - getPrice(a);
-              }
-              if (sortBy === 'location') {
-                return (a.location || '').localeCompare(b.location || '');
-              }
+              if (sortBy === 'newest') return new Date(b.created_at || b.createdAt || 0) - new Date(a.created_at || a.createdAt || 0);
+              if (sortBy === 'price-low') return getPrice(a) - getPrice(b);
+              if (sortBy === 'price-high') return getPrice(b) - getPrice(a);
+              if (sortBy === 'location') return (a.location || '').localeCompare(b.location || '');
               return 0;
             })
-            .map(product => (
+            .map((product, index) => (
               <div
-                key={product._id || product.id || Math.random()}
-                className="product-card"
-                onClick={() => openAdDetails(product._id || product.id)}
+                key={product.id || product._id || Math.random()}
+                className={`product-card scroll-reveal scroll-reveal-delay-${(index % 3) + 1}`}
+                onClick={() => openAdDetails(product.id || product._id)}
                 style={{ cursor: 'pointer' }}
               >
                 <div className="product-image">{product.image}</div>
                 <div className="product-info">
-                  <h3 className="product-name">{product.name}</h3>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <h3 className="product-name">{product.name}</h3>
+                    <span className={`status-tag-small ${product.is_booked && new Date(product.booked_until) > new Date() ? 'booked' : 'available'}`}>
+                      {product.is_booked && new Date(product.booked_until) > new Date() ? 'Booked' : 'Available'}
+                    </span>
+                  </div>
                   <p className="product-location">📍 {product.location}</p>
                   <p className="product-size">📏 {product.size}</p>
                   <div className="product-footer">
@@ -221,8 +283,8 @@ const AdList = () => {
                     <button
                       className="view-btn"
                       onClick={(e) => {
-                        e.stopPropagation(); // Prevent double trigger if button is clicked
-                        openAdDetails(product._id || product.id);
+                        e.stopPropagation();
+                        openAdDetails(product.id || product._id);
                       }}
                     >
                       View Details
@@ -236,6 +298,5 @@ const AdList = () => {
     </div>
   );
 }
-
 
 export default AdList

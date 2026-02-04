@@ -107,6 +107,7 @@ const Vendor = () => {
             if (authError || !user) {
                 console.error("Auth Error:", authError)
                 alert("Please login")
+                alert("You must be logged in to submit a listing.")
                 setLoading(false)
                 return
             }
@@ -141,6 +142,7 @@ const Vendor = () => {
             alert("Listing submitted successfully! Redirecting to Ad List...")
 
             // Redirect to AdList
+            // Redirect to AdList to see the new item
             navigate('/adlist')
 
         } catch (error) {
@@ -156,180 +158,208 @@ const Vendor = () => {
         imageInputRef.current.click()
     }
 
+    React.useEffect(() => {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                } else {
+                    entry.target.classList.remove('active');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        const elements = document.querySelectorAll('.scroll-reveal');
+        elements.forEach((el) => observer.observe(el));
+
+        return () => elements.forEach((el) => observer.unobserve(el));
+    }, []);
+
     return (
         <div>
-            <Navbar />
             <div className="container">
-                <div className="vendor-container">
+                <div className="vendor-container scroll-reveal">
                     <h1 className="vendor-title">List Your Ad Space</h1>
 
                     <form className="vendor-form" onSubmit={handleSubmit}>
 
                         {/* Ad Title/Name */}
                         <div className="form-group">
-                            <label>Ad Title</label>
-                            <input
-                                type="text"
-                                name="name"
-                                className="form-input"
-                                placeholder="e.g. Prime Billboard near City Center"
-                                value={formData.name}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-
-                        {/* Category */}
-                        <div className="form-group">
-                            <label>Category</label>
-                            <select
-                                name="category"
-                                className="form-input"
-                                value={formData.category}
-                                onChange={handleChange}
-                            >
-                                <option value="billboard">Billboard</option>
-                                <option value="digital">Digital Screen</option>
-                                <option value="transit">Transit Ad</option>
-                                <option value="mural">Wall Mural</option>
-                            </select>
-                        </div>
-
-                        {/* Location */}
-                        <div className="form-group">
-                            <label>Location</label>
-                            <input
-                                type="text"
-                                name="location"
-                                className="form-input"
-                                placeholder="e.g. 123 Main St, New York, NY"
-                                value={formData.location}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-
-                        {/* Size and Price */}
-                        <div style={{ display: 'flex', gap: '1rem' }}>
-                            <div className="form-group" style={{ flex: 1 }}>
-                                <label>Size (Dimensions)</label>
+                            <div className="form-group full-width centered-group scroll-reveal scroll-reveal-delay-1">
+                                <label>Ad Title</label>
                                 <input
                                     type="text"
-                                    name="size"
+                                    name="name"
                                     className="form-input"
-                                    placeholder="e.g. 14x48 ft"
-                                    value={formData.size}
+                                    placeholder="e.g. Prime Billboard near City Center"
+                                    value={formData.name}
                                     onChange={handleChange}
                                     required
                                 />
                             </div>
-                            <div className="form-group" style={{ flex: 1 }}>
-                                <label>Price per Month</label>
-                                <input
-                                    type="text"
-                                    name="price"
-                                    className="form-input"
-                                    placeholder="e.g. ₹500"
-                                    value={formData.price}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
-                        </div>
 
-                        {/* Description */}
-                        <div className="form-group">
-                            <label>Description</label>
-                            <textarea
-                                name="description"
-                                className="form-input"
-                                placeholder="Describe your ad space (visibility, traffic, etc.)"
-                                rows="4"
-                                value={formData.description}
-                                onChange={handleChange}
-                                style={{ resize: 'vertical' }}
-                            ></textarea>
-                        </div>
-
-                        {/* Contact Number */}
-                        <div className="form-group">
-                            <label>Contact Number</label>
-                            <input
-                                type="tel"
-                                name="contactNumber"
-                                className="form-input"
-                                placeholder="Your contact number"
-                                value={formData.contactNumber}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-
-                        {/* Drag & Drop Image Upload */}
-                        <div className="form-group">
-                            <label>Upload Images</label>
-                            <div
-                                className={`drop-zone ${dragActive ? 'drag-active' : ''}`}
-                                onDragEnter={handleDrag}
-                                onDragLeave={handleDrag}
-                                onDragOver={handleDrag}
-                                onDrop={handleDrop}
-                                onClick={onButtonClick}
-                            >
-                                <input
-                                    ref={imageInputRef}
-                                    type="file"
-                                    className="file-input-hidden"
-                                    multiple
-                                    accept="image/*"
-                                    onChange={handleImageChange}
-                                />
-                                <div className="drop-zone-icon">📷</div>
-                                <p className="drop-zone-text">Drag & drop images here, or click to select</p>
-                            </div>
-
-                            {/* Image Previews */}
-                            {images.length > 0 && (
-                                <div className="file-list">
-                                    {images.map((img, index) => (
-                                        <div key={index} className="file-preview">
-                                            <img src={img.preview} alt={`preview ${index}`} />
-                                            <button
-                                                type="button"
-                                                className="remove-file-btn"
-                                                onClick={() => removeImage(index)}
-                                            >
-                                                ✕
-                                            </button>
-                                        </div>
-                                    ))}
+                            {/* Category */}
+                            <div className="form-group"> {/* This div wraps Category, Location, Size, Price, Contact */}
+                                <div className="form-group scroll-reveal scroll-reveal-delay-2">
+                                    <label>Category</label>
+                                    <select
+                                        name="category"
+                                        className="form-input"
+                                        value={formData.category}
+                                        onChange={handleChange}
+                                    >
+                                        <option value="billboard">Billboard</option>
+                                        <option value="digital">Digital Screen</option>
+                                        <option value="transit">Transit Ad</option>
+                                        <option value="mural">Wall Mural</option>
+                                    </select>
                                 </div>
-                            )}
-                        </div>
 
-                        {/* Proof of Ownership */}
-                        <div className="form-group">
-                            <label>Proof of Ownership (Document)</label>
-                            <div
-                                className="form-input"
-                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}
-                                onClick={() => proofInputRef.current.click()}
-                            >
-                                <span>{proofFile ? proofFile.name : "Click to upload document..."}</span>
-                                <span>📄</span>
+                                {/* Location */}
+                                <div className="form-group scroll-reveal scroll-reveal-delay-3">
+                                    <label>Location</label>
+                                    <input
+                                        type="text"
+                                        name="location"
+                                        className="form-input"
+                                        placeholder="e.g. 123 Main St, New York, NY"
+                                        value={formData.location}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+
+                                {/* Size and Price */}
+                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                    <div className="form-group" style={{ flex: 1 }}>
+                                        <label>Size (Dimensions)</label>
+                                        <input
+                                            type="text"
+                                            name="size"
+                                            className="form-input"
+                                            placeholder="e.g. 14x48 ft"
+                                            value={formData.size}
+                                            onChange={handleChange}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group" style={{ flex: 1 }}>
+                                        <label>Price per Month</label>
+                                        <input
+                                            type="text"
+                                            name="price"
+                                            className="form-input"
+                                            placeholder="e.g. ₹500"
+                                            value={formData.price}
+                                            onChange={handleChange}
+                                            required
+                                        />
+                                    </div>
+                                </div> {/* Closing div for Size and Price flex container */}
+
+                                {/* Spacer to push Contact Number to the right */}
+                                <div className="spacer-group"></div>
+
+                                {/* Contact Number */}
+                                <div className="form-group scroll-reveal">
+                                    <label>Contact Number</label>
+                                    <input
+                                        type="tel"
+                                        name="contactNumber"
+                                        className="form-input"
+                                        placeholder="Your contact number"
+                                        value={formData.contactNumber}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+
+                                {/* Description */}
+                                <div className="form-group full-width scroll-reveal">
+                                    <label>Description</label>
+                                    <textarea
+                                        name="description"
+                                        className="form-input"
+                                        placeholder="Describe your ad space (visibility, traffic, etc.)"
+                                        rows="4"
+                                        value={formData.description}
+                                        onChange={handleChange}
+                                        style={{ resize: 'vertical' }}
+                                    ></textarea>
+                                </div>
+
+                                {/* Drag & Drop Image Upload */}
+                                <div className="form-group full-width scroll-reveal">
+                                    <label>Upload Images</label>
+                                    <div
+                                        className={`drop-zone ${dragActive ? 'drag-active' : ''}`}
+                                        onDragEnter={handleDrag}
+                                        onDragLeave={handleDrag}
+                                        onDragOver={handleDrag}
+                                        onDrop={handleDrop}
+                                        onClick={onButtonClick}
+                                    >
+                                        <input
+                                            ref={imageInputRef}
+                                            type="file"
+                                            className="file-input-hidden"
+                                            multiple
+                                            accept="image/*"
+                                            onChange={handleImageChange}
+                                        />
+                                        <div className="drop-zone-icon">📷</div>
+                                        <p className="drop-zone-text">Drag & drop images here, or click to select</p>
+                                    </div>
+
+                                    {/* Image Previews */}
+                                    {images.length > 0 && (
+                                        <div className="file-list">
+                                            {images.map((img, index) => (
+                                                <div key={index} className="file-preview">
+                                                    <img src={img.preview} alt={`preview ${index}`} />
+                                                    <button
+                                                        type="button"
+                                                        className="remove-file-btn"
+                                                        onClick={() => removeImage(index)}
+                                                    >
+                                                        ✕
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Proof of Ownership */}
+                                <div className="form-group full-width scroll-reveal">
+                                    <label>Proof of Ownership (Document)</label>
+                                    <div
+                                        className="form-input"
+                                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}
+                                        onClick={() => proofInputRef.current.click()}
+                                    >
+                                        <span>{proofFile ? proofFile.name : "Click to upload document..."}</span>
+                                        <span>📄</span>
+                                    </div>
+                                    <input
+                                        ref={proofInputRef}
+                                        type="file"
+                                        className="file-input-hidden"
+                                        accept=".pdf,.doc,.docx,.jpg,.png"
+                                        onChange={handleProofChange}
+                                    />
+                                </div>
+
+                                <button type="submit" className="submit-btn" disabled={loading}>
+                                    {loading ? 'Submitting...' : 'Submit Listing'}
+                                </button>
+                                <div className="full-width scroll-reveal">
+                                    <button type="submit" className="submit-btn" style={{ width: '100%' }} disabled={loading}>
+                                        {loading ? 'Submitting...' : 'Submit Listing'}
+                                    </button>
+                                </div>
                             </div>
-                            <input
-                                ref={proofInputRef}
-                                type="file"
-                                className="file-input-hidden"
-                                accept=".pdf,.doc,.docx,.jpg,.png"
-                                onChange={handleProofChange}
-                            />
                         </div>
-
-                        <button type="submit" className="submit-btn" disabled={loading}>
-                            {loading ? 'Submitting...' : 'Submit Listing'}
-                        </button>
                     </form>
                 </div>
             </div>

@@ -4,8 +4,11 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const path = require('path');
 
-dotenv.config(); // Must be loaded before other local imports that use env vars
+console.log('Index.js starting...');
+
+dotenv.config({ path: path.resolve(__dirname, '.env') }); // Must be loaded before other local imports that use env vars
 
 const adsRouter = require('./routes/ads');
 
@@ -24,6 +27,14 @@ app.get('/', (req, res) => {
 // Ad Routes
 app.use('/api/ads', adsRouter);
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
+});
+
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`Error: Port ${port} is already in use.`);
+  } else {
+    console.error('Server error:', err);
+  }
 });

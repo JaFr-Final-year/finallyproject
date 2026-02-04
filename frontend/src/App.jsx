@@ -1,5 +1,6 @@
 import './index.css'
 import { Routes, Route } from 'react-router-dom'
+import Navbar from './components/navbar.jsx'
 import Adlist from './pages/adlist.jsx'
 import Login from './pages/login.jsx'
 import Vendor from './pages/vendor.jsx'
@@ -8,12 +9,14 @@ import Home from './pages/home.jsx'
 import AdBoard from './pages/AdBoard.jsx'
 import About from './pages/about.jsx'
 import Admin from './pages/admin.jsx'
+import Contact from './pages/contact.jsx'
 /**
  * Main application component that defines the routing structure.
  */
 function App() {
   return (
     <>
+      <Navbar />
       <div>
         <Routes>
           {/* Home page */}

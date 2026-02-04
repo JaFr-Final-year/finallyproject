@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import Navbar from '../components/navbar'
 import Adlist from './adlist'
 import heroImage from '../assets/hero-image.png'
 import { supabase } from '../utils/supabase'
 import About from './about'
 
-const home = () => {
+const Home = () => {
     const [user, setUser] = useState(null)
     const [loading, setLoading] = useState(true)
 
@@ -31,11 +30,26 @@ const home = () => {
         return () => subscription.unsubscribe()
     }, [])
 
+    useEffect(() => {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                } else {
+                    entry.target.classList.remove('active');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        const elements = document.querySelectorAll('.scroll-reveal');
+        elements.forEach((el) => observer.observe(el));
+
+        return () => elements.forEach((el) => observer.unobserve(el));
+    }, [loading]); // Re-run when loading finishes so elements are in DOM
+
     return (
         <>
-            <Navbar />
-
-            <div className="home-container" style={{ paddingBottom: 0 }}>
+            <div className="home-container scroll-reveal" style={{ paddingBottom: 0 }}>
                 {/* Personalized welcome message */}
                 {!loading && user && (
                     <h1 className="welcome-text" style={{ marginTop: '2rem' }}>Welcome, {user.full_name || user.user_metadata?.name || user.email}</h1>
@@ -45,7 +59,7 @@ const home = () => {
                 )}
             </div>
 
-            <div className="hero-section">
+            <div className="hero-section scroll-reveal scroll-reveal-delay-1">
                 <div className="hero-content">
                     <h1 className="hero-title">
                         Search, Plan & Book <br />
@@ -57,15 +71,35 @@ const home = () => {
                     </p>
 
                 </div>
-                <div className="hero-image-container">
+                <div
+                    className="hero-image-container"
+                    onMouseMove={(e) => {
+                        const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+                        const x = ((e.clientX - left) / width) * 100;
+                        const y = ((e.clientY - top) / height) * 100;
+                        e.currentTarget.style.setProperty('--mouse-x', `${x}%`);
+                        e.currentTarget.style.setProperty('--mouse-y', `${y}%`);
+                    }}
+                    style={{ '--mouse-x': '50%', '--mouse-y': '50%' }}
+                >
+                    <div className="corner-bracket top-left"></div>
+                    <div className="corner-bracket top-right"></div>
+                    <div className="corner-bracket bottom-left"></div>
+                    <div className="corner-bracket bottom-right"></div>
                     <img src={heroImage} alt="AdBoard Illustration" className="hero-image" />
                 </div>
             </div>
 
             <Adlist />
             <About />
+            <div className="scroll-reveal scroll-reveal-delay-2">
+                <Adlist />
+            </div>
+            <div className="scroll-reveal scroll-reveal-delay-3">
+                <About />
+            </div>
         </>
     )
 }
 
-export default home
+export default Home
