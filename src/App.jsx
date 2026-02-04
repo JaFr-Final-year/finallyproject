@@ -1,5 +1,6 @@
 import './index.css'
 import { Routes, Route } from 'react-router-dom'
+import Navbar from './components/navbar.jsx'
 import Adlist from './pages/adlist.jsx'
 import Login from './pages/login.jsx'
 import Vendor from './pages/vendor.jsx'
@@ -7,12 +8,14 @@ import Profile from './pages/profile.jsx'
 import Home from './pages/home.jsx'
 import AdBoard from './pages/AdBoard.jsx'
 import About from './pages/about.jsx'
+import Contact from './pages/contact.jsx'
 /**
  * Main application component that defines the routing structure.
  */
 function App() {
   return (
     <>
+      <Navbar />
       <div>
         <Routes>
           {/* Home page */}
@@ -29,6 +32,8 @@ function App() {
           <Route path="/ad/:id" element={<AdBoard />} />
           {/* About Page */}
           <Route path="/about" element={<About />} />
+          {/* Contact Page */}
+          <Route path="/contact" element={<Contact />} />
         </Routes>
       </div>
     </>

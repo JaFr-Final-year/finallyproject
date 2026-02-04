@@ -1,6 +1,5 @@
 import React, { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Navbar from '../components/navbar'
 import { supabase } from '../utils/supabase'
 
 /**
@@ -176,7 +175,6 @@ const Vendor = () => {
 
     return (
         <div>
-            <Navbar />
             <div className="container">
                 <div className="vendor-container scroll-reveal">
                     <h1 className="vendor-title">List Your Ad Space</h1>

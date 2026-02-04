@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import Navbar from '../components/navbar'
 import Adlist from './adlist'
 import heroImage from '../assets/hero-image.png'
 import { supabase } from '../utils/supabase'
 import About from './about'
 
-const home = () => {
+const Home = () => {
     const [user, setUser] = useState(null)
     const [loading, setLoading] = useState(true)
 
@@ -50,8 +49,6 @@ const home = () => {
 
     return (
         <>
-            <Navbar />
-
             <div className="home-container scroll-reveal" style={{ paddingBottom: 0 }}>
                 {/* Personalized welcome message */}
                 {!loading && user && (
@@ -103,4 +100,4 @@ const home = () => {
     )
 }
 
-export default home
+export default Home

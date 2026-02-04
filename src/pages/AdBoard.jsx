@@ -59,7 +59,7 @@ const AdBoard = () => {
                             <p className="ad-location">📍 {product.location}</p>
                         </div>
                         <div className="ad-price-tag">
-                            {product.price}₹/Month  
+                            {product.price}₹/Month
                         </div>
                     </div>
 

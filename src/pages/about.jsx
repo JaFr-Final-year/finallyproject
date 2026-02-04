@@ -20,17 +20,18 @@ const About = () => {
 
     return (
         <div id="about-section" className="container" style={{ paddingTop: '100px', maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
-            <h1 className="welcome-text scroll-reveal" style={{ fontSize: '2.5rem', color: '#111827', marginBottom: '2rem' }}>About SpaceToAd</h1>
+            <h1 className="welcome-text scroll-reveal" style={{ fontSize: '2.5rem', marginBottom: '2rem' }}>About SpaceToAd</h1>
 
             <div className="scroll-reveal scroll-reveal-delay-1" style={{
-                backgroundColor: '#fff',
+                backgroundColor: 'var(--card-bg)',
                 padding: '2rem',
                 borderRadius: '12px',
-                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)',
+                boxShadow: '0 4px 6px var(--shadow-color)',
                 textAlign: 'justify',
                 lineHeight: '1.8',
-                color: '#334155',
-                fontSize: '1.1rem'
+                color: 'var(--text-secondary)',
+                fontSize: '1.1rem',
+                border: '1px solid var(--border-color)'
             }}>
                 <p>
                     The <strong>Advertisement Locator</strong> is a location-based application designed to help businesses and individuals to identify, manage, and track advertising opportunities in specific geographic areas.

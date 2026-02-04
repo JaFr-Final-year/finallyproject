@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import Navbar from '../components/navbar'
 import { supabase } from '../utils/supabase'
 
 /**
@@ -57,7 +56,6 @@ const Profile = () => {
   if (loading) {
     return (
       <div>
-        <Navbar />
         <div className="profile-page-container">
           <h1>Loading Profile...</h1>
         </div>
@@ -68,7 +66,6 @@ const Profile = () => {
   if (!user) {
     return (
       <div>
-        <Navbar />
         <div className="profile-page-container">
           <h1>Please log in to view your profile.</h1>
         </div>
@@ -78,7 +75,6 @@ const Profile = () => {
 
   return (
     <div>
-      <Navbar />
       <div className="profile-page-container">
 
         {/* 1. User Details Container */}

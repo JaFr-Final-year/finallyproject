@@ -9,7 +9,7 @@ import { supabase } from '../utils/supabase'
 const AdList = () => {
   const navigate = useNavigate()
   const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
+
   const [sortBy, setSortBy] = useState('newest')
   const [filterCategory, setFilterCategory] = useState('all')
   const [location, setLocation] = useState('')
@@ -29,7 +29,7 @@ const AdList = () => {
   const handleCurrentLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
+        () => {
           setLocation("Current Location")
         },
         (error) => {
@@ -68,7 +68,7 @@ const AdList = () => {
       } catch (error) {
         console.error('Error fetching session:', error.message)
       } finally {
-        setLoading(false)
+
       }
     }
 
