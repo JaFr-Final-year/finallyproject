@@ -267,7 +267,12 @@ const AdList = () => {
               >
                 <div className="product-image">{product.image}</div>
                 <div className="product-info">
-                  <h3 className="product-name">{product.name}</h3>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <h3 className="product-name">{product.name}</h3>
+                    <span className={`status-tag-small ${product.is_booked && new Date(product.booked_until) > new Date() ? 'booked' : 'available'}`}>
+                      {product.is_booked && new Date(product.booked_until) > new Date() ? 'Booked' : 'Available'}
+                    </span>
+                  </div>
                   <p className="product-location">📍 {product.location}</p>
                   <p className="product-size">📏 {product.size}</p>
                   <div className="product-footer">
