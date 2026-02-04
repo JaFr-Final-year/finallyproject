@@ -124,6 +124,31 @@ const AdList = () => {
     { label: 'Location', value: 'location' }
   ];
 
+  const [maxPrice, setMaxPrice] = useState('')
+  const [allLocations, setAllLocations] = useState(popularLocations)
+
+  // Applied filters state (updated only on search button click)
+  const [appliedLocation, setAppliedLocation] = useState('')
+  const [appliedMaxPrice, setAppliedMaxPrice] = useState('')
+
+  useEffect(() => {
+    if (products.length > 0) {
+      const productLocations = [...new Set(products.map(p => p.location).filter(Boolean))]
+      const uniqueLocations = [...new Set([...popularLocations, ...productLocations])]
+      setAllLocations(uniqueLocations)
+    }
+  }, [products])
+
+  const getPrice = (p) => {
+    if (typeof p.price === 'number') return p.price;
+    return parseInt(p.price?.toString().replace(/[^0-9]/g, '') || 0);
+  };
+
+  const handleSearch = () => {
+    setAppliedLocation(location);
+    setAppliedMaxPrice(maxPrice);
+  };
+
   return (
     <div>
       <div className="home-container" id="ad-search-section">
@@ -153,7 +178,7 @@ const AdList = () => {
                 <li className="suggestion-item current-location" onClick={handleCurrentLocation}>
                   📍 Use Current Location
                 </li>
-                {popularLocations.filter(loc => loc.toLowerCase().includes(location.toLowerCase()) && loc !== location).map((loc) => (
+                {allLocations.filter(loc => loc.toLowerCase().includes(location.toLowerCase()) && loc !== location).map((loc) => (
                   <li key={loc} className="suggestion-item" onClick={() => {
                     setLocation(loc);
                     setShowSuggestions(false);
@@ -173,7 +198,12 @@ const AdList = () => {
             </div>
             <div className="search-input-content">
               <label>Budget</label>
-              <input type="number" placeholder="What's your budget?" />
+              <input
+                type="number"
+                placeholder="Max budget (₹)"
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(e.target.value)}
+              />
             </div>
           </div>
 
@@ -189,7 +219,7 @@ const AdList = () => {
             </div>
           </div>
 
-          <button className="search-action-btn">
+          <button className="search-action-btn" onClick={handleSearch}>
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
           </button>
         </div>
@@ -248,13 +278,15 @@ const AdList = () => {
         {/* Dynamic Product Grid */}
         <div className="products-grid">
           {products
-            .filter(product => (product.status === 'active' || !product.status || (user && product.owner_id === user.id)) && (filterCategory === 'all' || product.category === filterCategory))
-            .sort((a, b) => {
-              const getPrice = (p) => {
-                if (typeof p.price === 'number') return p.price;
-                return parseInt(p.price?.toString().replace(/[^0-9]/g, '') || 0);
-              };
+            .filter(product => {
+              const matchesStatus = (product.status === 'active' || (user && product.owner_id === user.id));
+              const matchesCategory = (filterCategory === 'all' || product.category === filterCategory);
+              const matchesLocation = appliedLocation === '' || (product.location && product.location.toLowerCase().includes(appliedLocation.toLowerCase()));
+              const matchesPrice = appliedMaxPrice === '' || getPrice(product) <= Number(appliedMaxPrice);
 
+              return matchesStatus && matchesCategory && matchesLocation && matchesPrice;
+            })
+            .sort((a, b) => {
               if (sortBy === 'newest') return new Date(b.created_at || b.createdAt || 0) - new Date(a.created_at || a.createdAt || 0);
               if (sortBy === 'price-low') return getPrice(a) - getPrice(b);
               if (sortBy === 'price-high') return getPrice(b) - getPrice(a);
