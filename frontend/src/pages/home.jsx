@@ -92,12 +92,6 @@ const Home = () => {
 
             <Adlist />
             <About />
-            <div className="scroll-reveal scroll-reveal-delay-2">
-                <Adlist />
-            </div>
-            <div className="scroll-reveal scroll-reveal-delay-3">
-                <About />
-            </div>
         </>
     )
 }

@@ -108,12 +108,46 @@ const AdBoard = () => {
 
     const isEffectivelyBooked = product.is_booked && new Date(product.booked_until) > new Date();
 
+    const AdImage = ({ image }) => {
+        if (!image) return null;
+
+        let img = Array.isArray(image) ? image[0] : image;
+        // Sometimes Supabase returns jsonb as a string like '["path"]'
+        if (typeof img === 'string' && (img.startsWith('[') || img.startsWith('"'))) {
+            try {
+                const parsed = JSON.parse(img);
+                img = Array.isArray(parsed) ? parsed[0] : parsed;
+            } catch (e) {
+                img = img.replace(/[\[\]"]/g, '');
+            }
+        }
+
+        // Robust check: If it contains a slash, it's a storage path
+        if (img && typeof img === 'string' && img.includes('/')) {
+            const baseUrl = import.meta.env.VITE_SUPABASE_URL;
+            const publicUrl = `${baseUrl}/storage/v1/object/public/ads-images/${img}`;
+            return <img
+                src={publicUrl}
+                alt="AdBoard"
+                className="real-ad-image"
+                onError={(e) => {
+                    e.target.style.display = 'none';
+                    const parent = e.target.parentElement;
+                    if (parent) parent.innerHTML = '<span class="ad-emoji-placeholder">📢</span>';
+                }}
+            />;
+        }
+
+        // Fallback to emoji/icon
+        return <span className="ad-emoji-placeholder">{img}</span>;
+    };
+
     return (
         <div className="ad-board-wrapper">
             <div className="ad-board-container">
                 <div className="ad-hero-section">
                     <div className="ad-hero-image">
-                        {product.image}
+                        <AdImage image={product.image} />
                     </div>
                 </div>
 

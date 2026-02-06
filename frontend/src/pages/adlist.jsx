@@ -293,38 +293,73 @@ const AdList = () => {
               if (sortBy === 'location') return (a.location || '').localeCompare(b.location || '');
               return 0;
             })
-            .map((product, index) => (
-              <div
-                key={product.id || product._id || Math.random()}
-                className={`product-card scroll-reveal scroll-reveal-delay-${(index % 3) + 1}`}
-                onClick={() => openAdDetails(product.id || product._id)}
-                style={{ cursor: 'pointer' }}
-              >
-                <div className="product-image">{product.image}</div>
-                <div className="product-info">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <h3 className="product-name">{product.name}</h3>
-                    <span className={`status-tag-small ${product.is_booked && new Date(product.booked_until) > new Date() ? 'booked' : 'available'}`}>
-                      {product.is_booked && new Date(product.booked_until) > new Date() ? 'Booked' : 'Available'}
-                    </span>
+            .map((product, index) => {
+              const AdImage = ({ image }) => {
+                if (!image) return null;
+
+                let img = Array.isArray(image) ? image[0] : image;
+                // Sometimes Supabase returns jsonb as a string like '["path"]'
+                if (typeof img === 'string' && (img.startsWith('[') || img.startsWith('"'))) {
+                  try {
+                    const parsed = JSON.parse(img);
+                    img = Array.isArray(parsed) ? parsed[0] : parsed;
+                  } catch (e) {
+                    img = img.replace(/[\[\]"]/g, '');
+                  }
+                }
+
+                if (img && typeof img === 'string' && img.includes('/')) {
+                  const baseUrl = import.meta.env.VITE_SUPABASE_URL;
+                  const publicUrl = `${baseUrl}/storage/v1/object/public/ads-images/${img}`;
+                  return <img
+                    src={publicUrl}
+                    alt="AdBoard"
+                    className="real-ad-image-small"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      const parent = e.target.parentElement;
+                      if (parent) parent.innerHTML = '<span class="ad-emoji-placeholder-small">📢</span>';
+                    }}
+                  />;
+                }
+                return <span className="ad-emoji-placeholder-small">{img}</span>;
+              };
+
+              return (
+                <div
+                  key={product.id || product._id || Math.random()}
+                  className={`product-card scroll-reveal scroll-reveal-delay-${(index % 3) + 1}`}
+                  onClick={() => openAdDetails(product.id || product._id)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className="product-image">
+                    <AdImage image={product.image} />
                   </div>
-                  <p className="product-location">📍 {product.location}</p>
-                  <p className="product-size">📏 {product.size}</p>
-                  <div className="product-footer">
-                    <span className="product-price">{product.price || 0}₹/Month</span>
-                    <button
-                      className="view-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openAdDetails(product.id || product._id);
-                      }}
-                    >
-                      View Details
-                    </button>
+                  <div className="product-info">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <h3 className="product-name">{product.name}</h3>
+                      <span className={`status-tag-small ${product.is_booked && new Date(product.booked_until) > new Date() ? 'booked' : 'available'}`}>
+                        {product.is_booked && new Date(product.booked_until) > new Date() ? 'Booked' : 'Available'}
+                      </span>
+                    </div>
+                    <p className="product-location">📍 {product.location}</p>
+                    <p className="product-size">📏 {product.size}</p>
+                    <div className="product-footer">
+                      <span className="product-price">{product.price || 0}₹/Month</span>
+                      <button
+                        className="view-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openAdDetails(product.id || product._id);
+                        }}
+                      >
+                        View Details
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
         </div>
       </div>
     </div>

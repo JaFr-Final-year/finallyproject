@@ -659,6 +659,26 @@ span {
   justify-content: center;
   font-size: 4rem;
   border-bottom: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.real-ad-image-small {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.product-card:hover .real-ad-image-small {
+  transform: scale(1.1);
+}
+
+.ad-emoji-placeholder-small {
+  transition: transform 0.5s ease;
+}
+
+.product-card:hover .ad-emoji-placeholder-small {
+  transform: scale(1.2) rotate(5deg);
 }
 
 .product-info {
@@ -861,9 +881,9 @@ span {
 
 /* ========== VENDOR PAGE STYLES ========== */
 .vendor-container {
-  max-width: 1400px;
+  max-width: 1000px;
   margin: 120px auto 4rem auto;
-  padding: 5rem;
+  padding: 4rem;
   background: var(--glass-bg);
   backdrop-filter: blur(10px);
   border-radius: 50px;
@@ -885,8 +905,10 @@ span {
 
 .vendor-form {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 2.5rem;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .vendor-form .form-group:not(.full-width) {
@@ -894,7 +916,7 @@ span {
 }
 
 .vendor-form .full-width {
-  grid-column: span 3;
+  grid-column: span 2;
 }
 
 .form-row {
@@ -915,6 +937,8 @@ span {
 }
 
 .centered-group {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   text-align: center;
 }

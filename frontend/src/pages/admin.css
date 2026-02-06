@@ -1,0 +1,321 @@
+.admin-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0f172a 0%, #020617 100%);
+    position: relative;
+    overflow: hidden;
+    color: #fff;
+    padding-top: 40px;
+}
+
+.interactive-bg-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    background: #020617;
+    overflow: hidden;
+}
+
+/* Shifting Mesh Gradient Blobs - Automatic Animation */
+.bg-blob {
+    position: absolute;
+    width: 60vw;
+    height: 60vw;
+    border-radius: 50%;
+    z-index: 1;
+    filter: blur(100px);
+    opacity: 0.5;
+    mix-blend-mode: screen;
+    animation: move-auto 35s infinite alternate ease-in-out;
+}
+
+.blob-1 {
+    top: -10%;
+    left: -10%;
+    background: radial-gradient(circle, #c5a059 0%, transparent 70%);
+}
+
+.blob-2 {
+    bottom: -10%;
+    right: -10%;
+    background: radial-gradient(circle, #1e293b 0%, transparent 70%);
+    animation-duration: 45s;
+    animation-delay: -10s;
+}
+
+.blob-3 {
+    top: 30%;
+    right: 5%;
+    width: 40vw;
+    height: 40vw;
+    background: radial-gradient(circle, #94a3b8 0%, transparent 70%);
+    animation-duration: 40s;
+    animation-delay: -5s;
+}
+
+.blob-4 {
+    bottom: 20%;
+    left: 10%;
+    width: 35vw;
+    height: 35vw;
+    background: radial-gradient(circle, #c5a059 0%, transparent 70%);
+    animation-duration: 30s;
+    animation-delay: -15s;
+    opacity: 0.3;
+}
+
+@keyframes move-auto {
+    0% {
+        transform: translate(0, 0) rotate(0deg) scale(1);
+    }
+
+    33% {
+        transform: translate(10vw, 5vh) rotate(120deg) scale(1.1);
+    }
+
+    66% {
+        transform: translate(-5vw, 10vh) rotate(240deg) scale(0.9);
+    }
+
+    100% {
+        transform: translate(3vw, -3vh) rotate(360deg) scale(1.05);
+    }
+}
+
+/* Header */
+.admin-custom-header {
+    position: relative;
+    z-index: 10;
+    max-width: 1200px;
+    margin: 0 auto 2rem auto;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: center;
+}
+
+.admin-logo-link {
+    text-decoration: none;
+    transition: transform 0.3s ease;
+}
+
+.admin-logo-link:hover {
+    transform: scale(1.05);
+}
+
+.admin-logo-text {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #c5a059;
+    letter-spacing: -1px;
+    text-transform: none;
+    text-shadow: 0 0 20px rgba(197, 160, 89, 0.3);
+}
+
+/* Login Card Override */
+.admin-login-wrapper {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 70vh;
+}
+
+.admin-login-card {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 40px;
+    padding: 3rem;
+    width: 100%;
+    max-width: 450px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+    text-align: center;
+}
+
+.admin-login-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #fff 0%, #c5a059 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.admin-input {
+    width: 100%;
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 1.2rem;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50px;
+    color: #fff;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.admin-input:focus {
+    outline: none;
+    border-color: #c5a059;
+    background: rgba(197, 160, 89, 0.05);
+    box-shadow: 0 0 20px rgba(197, 160, 89, 0.2);
+}
+
+.admin-login-btn {
+    width: 100%;
+    padding: 1.2rem;
+    background: #c5a059;
+    color: #0f172a;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 1rem;
+    box-shadow: 0 10px 20px rgba(197, 160, 89, 0.2);
+}
+
+.admin-login-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px rgba(197, 160, 89, 0.3);
+    background: #d4af62;
+}
+
+/* Dashboard Styles */
+.admin-dashboard-wrapper {
+    position: relative;
+    z-index: 10;
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.admin-glass-panel {
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 30px;
+    padding: 2.5rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.admin-stat-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+}
+
+.admin-title-main {
+    font-size: 2.5rem;
+    font-weight: 900;
+    margin: 0;
+    background: linear-gradient(135deg, #fff 0%, #c5a059 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Table Customization */
+.premium-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 12px;
+}
+
+.premium-table th {
+    padding: 1.2rem;
+    color: #94a3b8;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.85rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.premium-table tr.row-item {
+    background: rgba(255, 255, 255, 0.03);
+    transition: all 0.3s ease;
+}
+
+.premium-table tr.row-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+    transform: scale(1.005);
+}
+
+.premium-table td {
+    padding: 1.5rem 1.2rem;
+}
+
+.row-item td:first-child {
+    border-radius: 15px 0 0 15px;
+}
+
+.row-item td:last-child {
+    border-radius: 0 15px 15px 0;
+}
+
+.status-pill {
+    padding: 0.4rem 1rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.status-active {
+    background: rgba(34, 197, 94, 0.1);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.status-pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.action-btn-group {
+    display: flex;
+    gap: 0.8rem;
+}
+
+.dashboard-btn {
+    padding: 0.6rem 1.2rem;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-accept {
+    background: #22c55e;
+    color: #fff;
+}
+
+.btn-delete {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.btn-accept:hover {
+    background: #16a34a;
+    transform: translateY(-2px);
+}
+
+.btn-delete:hover {
+    background: #ef4444;
+    color: #fff;
+    transform: translateY(-2px);
+}

@@ -1,5 +1,5 @@
 import './index.css'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import Navbar from './components/navbar.jsx'
 import Adlist from './pages/adlist.jsx'
 import Login from './pages/login.jsx'
@@ -14,9 +14,12 @@ import Contact from './pages/contact.jsx'
  * Main application component that defines the routing structure.
  */
 function App() {
+  const location = useLocation();
+  const showNavbar = location.pathname !== '/admin';
+
   return (
     <>
-      <Navbar />
+      {showNavbar && <Navbar />}
       <div>
         <Routes>
           {/* Home page */}
@@ -35,6 +38,8 @@ function App() {
           <Route path="/about" element={<About />} />
           {/* Admin Page */}
           <Route path="/admin" element={<Admin />} />
+          {/* Contact Page */}
+          <Route path="/contact" element={<Contact />} />
         </Routes>
       </div>
     </>

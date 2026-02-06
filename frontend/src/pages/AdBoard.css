@@ -39,6 +39,19 @@
     font-size: 12rem;
     filter: drop-shadow(0 0 30px rgba(197, 160, 89, 0.3));
     animation: float 6s ease-in-out infinite;
+    max-width: 1000px;
+    width: 90%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.real-ad-image {
+    width: 100%;
+    max-height: 45vh;
+    object-fit: contain;
+    border-radius: 40px;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
 }
 
 @keyframes float {
