@@ -15,7 +15,7 @@ import Contact from './pages/contact.jsx'
  */
 function App() {
   const location = useLocation();
-  const showNavbar = location.pathname !== '/admin';
+  const showNavbar = location.pathname !== '/admin' && location.pathname !== '/login';
 
   return (
     <>

@@ -63,14 +63,62 @@ const Navbar = () => {
         }
     }
 
+    const [activeHash, setActiveHash] = useState(location.hash);
+
+    useEffect(() => {
+        if (location.pathname !== '/') {
+            setActiveHash('');
+            return;
+        }
+
+        const sections = ['ad-search-section', 'about-section'];
+        const observerOptions = {
+            root: null,
+            rootMargin: '-20% 0px -70% 0px',
+            threshold: 0
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    setActiveHash(`#${entry.target.id}`);
+                }
+            });
+        }, observerOptions);
+
+        sections.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) observer.observe(el);
+        });
+
+        const handleScroll = () => {
+            if (window.scrollY < 100) {
+                setActiveHash('');
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+
+        return () => {
+            observer.disconnect();
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, [location.pathname]);
+
+    useEffect(() => {
+        setActiveHash(location.hash);
+    }, [location.hash]);
+
     const handleNavClick = (href) => {
         if (href === '/') {
             navigate('/');
             window.scrollTo({ top: 0, behavior: 'smooth' });
+            setActiveHash('');
         } else if (href.startsWith('#')) {
             const element = document.getElementById(href.substring(1));
             if (element) {
                 element.scrollIntoView({ behavior: 'smooth' });
+                setActiveHash(href);
                 window.history.pushState(null, null, href);
             } else if (location.pathname !== '/') {
                 navigate('/');
@@ -78,6 +126,7 @@ const Navbar = () => {
                     const el = document.getElementById(href.substring(1));
                     if (el) {
                         el.scrollIntoView({ behavior: 'smooth' });
+                        setActiveHash(href);
                         window.history.pushState(null, null, href);
                     }
                 }, 500);
@@ -94,20 +143,22 @@ const Navbar = () => {
             </div>
 
             <ul className="navbar">
-                {NAV_ITEMS.map((item) => (
-                    <li
-                        key={item.href}
-                        onClick={() => handleNavClick(item.href)}
-                        style={{
-                            color: ((item.href === '/' && location.pathname === '/' && !location.hash) ||
-                                (item.href === location.pathname) ||
-                                (item.href.startsWith('#') && location.hash === item.href))
-                                ? '#c5a059' : undefined
-                        }}
-                    >
-                        {item.label}
-                    </li>
-                ))}
+                {NAV_ITEMS.map((item) => {
+                    const isHome = item.label === 'Home';
+                    const isActive = isHome
+                        ? (location.pathname === '/' && !activeHash)
+                        : (activeHash === item.href || (location.pathname === item.href));
+
+                    return (
+                        <li
+                            key={item.href}
+                            onClick={() => handleNavClick(item.href)}
+                            style={{ color: isActive ? '#c5a059' : undefined }}
+                        >
+                            {item.label}
+                        </li>
+                    );
+                })}
             </ul>
 
             <div className="nav-actions-container">

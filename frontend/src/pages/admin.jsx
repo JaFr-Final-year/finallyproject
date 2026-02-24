@@ -44,10 +44,30 @@ const Admin = () => {
         try {
             setLoading(true);
             const res = await fetch("http://localhost:5000/api/ads");
-            const data = await res.json();
-            setAds(data);
+
+            if (res.ok) {
+                const data = await res.json();
+                if (Array.isArray(data)) {
+                    setAds(data);
+                    return;
+                }
+            }
+
+            throw new Error("Backend API returned invalid data or error");
         } catch (err) {
-            console.error("Fetch ads error:", err);
+            console.warn("Backend fetch failed, falling back to Supabase:", err);
+            try {
+                const { data, error } = await supabase
+                    .from('ads')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                setAds(data || []);
+            } catch (supabaseErr) {
+                console.error("Supabase fallback error:", supabaseErr);
+                setAds([]);
+            }
         } finally {
             setLoading(false);
         }
@@ -61,13 +81,32 @@ const Admin = () => {
                 body: JSON.stringify({ status: "active" })
             });
 
-            if (!res.ok) throw new Error("Accept failed");
+            if (res.ok) {
+                await fetchAds();
+                alert("Ad accepted");
+                return;
+            }
 
-            await fetchAds();
-            alert("Ad accepted");
+            const errorData = await res.json().catch(() => ({}));
+            throw new Error(errorData.error || `Accept failed with status: ${res.status}`);
         } catch (err) {
-            console.error(err);
-            alert("Failed to accept ad");
+            console.warn("Backend accept failed, trying Supabase directly:", err);
+            try {
+                const { data, error } = await supabase
+                    .from('ads')
+                    .update({ status: 'active' })
+                    .eq('id', id)
+                    .select();
+
+                if (error) throw error;
+                if (!data || data.length === 0) throw new Error("Update blocked by database permissions (RLS).");
+
+                await fetchAds();
+                alert("Ad accepted successfully");
+            } catch (supabaseErr) {
+                console.error("Supabase accept error:", supabaseErr);
+                alert(`Failed to accept ad: ${supabaseErr.message}`);
+            }
         }
     };
 
@@ -79,13 +118,32 @@ const Admin = () => {
                 method: "DELETE"
             });
 
-            if (!res.ok) throw new Error("Delete failed");
+            if (res.ok) {
+                await fetchAds();
+                alert("Ad removed successfully");
+                return;
+            }
 
-            await fetchAds();
-            alert("Ad removed");
+            const errorData = await res.json().catch(() => ({}));
+            throw new Error(errorData.error || `Delete failed with status: ${res.status}`);
         } catch (err) {
-            console.error(err);
-            alert("Failed to remove ad");
+            console.warn("Backend delete failed, trying Supabase directly:", err);
+            try {
+                const { data, error } = await supabase
+                    .from('ads')
+                    .delete()
+                    .eq('id', id)
+                    .select();
+
+                if (error) throw error;
+                if (!data || data.length === 0) throw new Error("Deletion blocked by database permissions (RLS).");
+
+                await fetchAds();
+                alert("Ad removed successfully");
+            } catch (supabaseErr) {
+                console.error("Supabase delete error:", supabaseErr);
+                alert(`Failed to remove ad: ${supabaseErr.message}`);
+            }
         }
     };
 
@@ -142,18 +200,6 @@ const Admin = () => {
         ? ads.filter(ad => ad.status !== 'active')
         : ads;
 
-    // Automatic Background Blobs Component
-    const InteractiveBackground = () => {
-        return (
-            <div className="interactive-bg-container">
-                <div className="bg-blob blob-1"></div>
-                <div className="bg-blob blob-2"></div>
-                <div className="bg-blob blob-3"></div>
-                <div className="bg-blob blob-4"></div>
-            </div>
-        );
-    };
-
     const AdminHeader = () => (
         <header className="admin-custom-header">
             <Link to="/" className="admin-logo-link">
@@ -165,7 +211,6 @@ const Admin = () => {
     if (!isLoggedIn) {
         return (
             <div className="admin-page">
-                <InteractiveBackground />
                 <AdminHeader />
                 <div className="admin-login-wrapper">
                     <div className="admin-login-card">
@@ -197,7 +242,6 @@ const Admin = () => {
 
     return (
         <div className="admin-page">
-            <InteractiveBackground />
             <AdminHeader />
 
             <div className="admin-dashboard-wrapper">

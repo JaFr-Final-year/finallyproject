@@ -1,0 +1,8 @@
+Starting diagnosis...
+Dotenv loaded.
+Parsed env keys: SUPABASE_URL, SUPABASE_KEY, PORT
+Current directory: C:\Users\njanr\OneDrive\Desktop\Project\finallyproject\backend
+SUPABASE_URL: https://gtzrljmeynmuoqfxjpyv.supabase.co
+SUPABASE_KEY: Found
+Requiring supabase.js...
+Supabase required successfully.

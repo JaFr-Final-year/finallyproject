@@ -8,9 +8,11 @@ const supabaseUrl = process.env.SUPABASE_URL;
 // Prefer Service Role Key (Admin) -> Fallback to Anon Key
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
 
+/*
 console.log('Supabase Config Check:');
 console.log('URL:', supabaseUrl);
 console.log('Key exists:', !!supabaseKey);
+*/
 
 if (!supabaseUrl || !supabaseKey) {
     console.error('Missing Supabase URL or Key. Check .env file.');
