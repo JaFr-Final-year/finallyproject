@@ -10,6 +10,7 @@ import AdBoard from './pages/AdBoard.jsx'
 import About from './pages/about.jsx'
 import Admin from './pages/admin.jsx'
 import Contact from './pages/contact.jsx'
+import BookingPage from './pages/BookingPage.jsx'
 /**
  * Main application component that defines the routing structure.
  */
@@ -40,6 +41,8 @@ function App() {
           <Route path="/admin" element={<Admin />} />
           {/* Contact Page */}
           <Route path="/contact" element={<Contact />} />
+          {/* Booking Page */}
+          <Route path="/book/:id" element={<BookingPage />} />
         </Routes>
       </div>
     </>

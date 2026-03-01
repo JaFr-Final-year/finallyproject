@@ -100,7 +100,7 @@ const Navbar = () => {
         window.addEventListener('scroll', handleScroll);
 
         return () => {
-            observer.disconnect();
+            observer.disconnect()
             window.removeEventListener('scroll', handleScroll);
         };
     }, [location.pathname]);

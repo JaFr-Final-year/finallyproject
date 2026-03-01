@@ -141,4 +141,30 @@ router.put('/:id/status', async (req, res) => {
     }
 });
 
+// Update ad general details (Edit)
+router.put('/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const adUpdateData = { ...req.body };
+
+        // Ensure price is handled as number if present
+        if (adUpdateData.price) {
+            adUpdateData.price = Number(adUpdateData.price);
+        }
+
+        const { data, error } = await supabase
+            .from('ads')
+            .update(adUpdateData)
+            .eq('id', id)
+            .select();
+
+        if (error) throw error;
+
+        res.json({ success: true, data });
+    } catch (error) {
+        console.error("Error updating ad:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 module.exports = router;

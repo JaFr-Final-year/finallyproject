@@ -1837,3 +1837,35 @@ textarea.form-input {
   font-weight: bold;
   font-size: 1rem;
 }
+
+/* Premium Aesthetic Loader */
+.ad-loading-container,
+.booking-loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  width: 100%;
+}
+
+.premium-loader {
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--bg-secondary);
+  border-bottom-color: #c5a059;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+  box-shadow: 0 4px 15px rgba(197, 160, 89, 0.2);
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}

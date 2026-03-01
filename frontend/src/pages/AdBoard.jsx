@@ -21,39 +21,8 @@ const AdBoard = () => {
             return;
         }
 
-        const period = prompt("Enter booking period in days:", "30");
-        if (!period || isNaN(period)) return;
-
-        const bookedUntil = new Date();
-        bookedUntil.setDate(bookedUntil.getDate() + parseInt(period));
-
-        try {
-            // Use .select() to confirm the update actually happened (RLS might block it silently)
-            const { data, error } = await supabase
-                .from('ads')
-                .update({
-                    is_booked: true,
-                    booked_until: bookedUntil.toISOString(),
-                    booked_by_email: session.user.email // Track who booked it
-                })
-                .eq('id', id)
-                .select();
-
-            if (error) {
-                console.error("Error booking ad:", error);
-                alert("Failed to book ad: " + error.message);
-            } else if (!data || data.length === 0) {
-                // This happens if RLS blocks the update or the ID doesn't match
-                alert("Booking failed. This might be because of database permissions (RLS) or the ad no longer exists. Please ensure you have permission to update this ad.");
-                console.warn("No rows updated. Check RLS policies on 'ads' table.");
-            } else {
-                alert(`Successfully booked for ${period} days!`);
-                setProduct(data[0]); // Update local state with the actual data from DB
-            }
-        } catch (err) {
-            console.error("Unexpected error:", err);
-            alert("An unexpected error occurred.");
-        }
+        // Navigate to the new booking page
+        navigate(`/book/${id}`);
     }
 
     useEffect(() => {
@@ -95,7 +64,11 @@ const AdBoard = () => {
     }, [id])
 
     if (loading) {
-        return <div className="ad-loading">Loading Ad Details...</div>
+        return (
+            <div className="ad-loading-container">
+                <div className="premium-loader"></div>
+            </div>
+        )
     }
 
     if (!product) {
