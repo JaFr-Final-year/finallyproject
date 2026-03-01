@@ -122,7 +122,6 @@ const Vendor = () => {
             data.append('description', `${formData.description}\n\nContact Number: ${formData.contactNumber}`)
             data.append('category', formData.category)
             data.append('owner_id', user.id)
-            data.append('email', user.email)
 
             // Append the first image if available
             if (images.length > 0) {
