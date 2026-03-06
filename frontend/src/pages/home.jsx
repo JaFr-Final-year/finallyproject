@@ -52,7 +52,7 @@ const Home = () => {
             <div className="home-container scroll-reveal" style={{ paddingBottom: 0 }}>
                 {/* Personalized welcome message */}
                 {!loading && user && (
-                    <h1 className="welcome-text" style={{ marginTop: '2rem' }}>Welcome, {user.user_metadata?.name || user.email}</h1>
+                    <h1 className="welcome-text" style={{ marginTop: '2rem' }}>Welcome, {user.full_name || user.user_metadata?.name || user.email}</h1>
                 )}
                 {!loading && !user && (
                     <h1 className="welcome-text" style={{ marginTop: '2rem' }}>Explore Ad Spaces</h1>
@@ -90,12 +90,8 @@ const Home = () => {
                 </div>
             </div>
 
-            <div className="scroll-reveal scroll-reveal-delay-2">
-                <Adlist />
-            </div>
-            <div className="scroll-reveal scroll-reveal-delay-3">
-                <About />
-            </div>
+            <Adlist />
+            <About />
         </>
     )
 }

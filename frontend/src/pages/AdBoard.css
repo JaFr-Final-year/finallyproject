@@ -37,20 +37,19 @@
 
 .ad-hero-image {
     font-size: 12rem;
-    filter: drop-shadow(0 0 30px rgba(197, 160, 89, 0.3));
-    animation: float 6s ease-in-out infinite;
+    max-width: 1000px;
+    width: 90%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-@keyframes float {
-
-    0%,
-    100% {
-        transform: translateY(0px) rotate(0deg);
-    }
-
-    50% {
-        transform: translateY(-20px) rotate(2deg);
-    }
+.real-ad-image {
+    width: 100%;
+    max-height: 45vh;
+    object-fit: contain;
+    border-radius: 40px;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
 }
 
 .ad-content-section {
@@ -107,9 +106,29 @@
 
 .ad-details-grid {
     display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
+    grid-template-columns: 1fr 1fr;
     gap: 3rem;
     margin-bottom: 4rem;
+}
+
+.ad-info-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+}
+
+.map-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.map-card h3 {
+    margin-bottom: 2rem;
+}
+
+.ad-board-map-container {
+    height: 500px !important;
+    width: 100%;
 }
 
 @media (max-width: 900px) {
@@ -235,6 +254,12 @@
     background: rgba(239, 68, 68, 0.1);
     color: #ef4444;
     border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.status-badge.pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.2);
 }
 
 .value.finish-date {

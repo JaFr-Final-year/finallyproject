@@ -1,0 +1,341 @@
+import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { supabase } from '../utils/supabase'
+import GlobalMap from '../components/GlobalMap'
+
+/**
+ * AdList component that displays available advertising spaces.
+ * Supports filtering by category and sorting with custom dropdowns.
+ */
+const AdList = () => {
+  const navigate = useNavigate()
+  const [user, setUser] = useState(null)
+
+  const [sortBy, setSortBy] = useState('newest')
+  const [filterCategory, setFilterCategory] = useState('all')
+  const [location, setLocation] = useState('')
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [products, setProducts] = useState([])
+
+  // State for Custom Dropdowns
+  const [filterOpen, setFilterOpen] = useState(false)
+  const [sortOpen, setSortOpen] = useState(false)
+
+  const openAdDetails = (id) => {
+    navigate(`/ad/${id}`)
+  }
+
+  const [viewMode, setViewMode] = useState('grid') // 'grid' | 'map'
+
+  const popularLocations = ['Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai', 'Kolkata', 'Pune', 'Ahmedabad', 'Jaipur', 'Surat']
+
+  const handleCurrentLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        () => {
+          setLocation("Current Location")
+        },
+        (error) => {
+          console.error("Error getting location: ", error)
+          alert("Unable to retrieve your location")
+        }
+      )
+    } else {
+      alert("Geolocation is not supported by this browser.")
+    }
+  }
+
+  // Fetch products from Supabase
+  const fetchProducts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('ads')
+        .select('*')
+
+      if (error) {
+        console.error('Error fetching ads:', error)
+      } else {
+        setProducts(data || [])
+      }
+    } catch (err) {
+      console.error('Unexpected error fetching ads:', err)
+    }
+  }
+
+  useEffect(() => {
+    const getUser = async () => {
+      try {
+        const { data, error } = await supabase.auth.getSession()
+        if (error) throw error
+        setUser(data.session?.user ?? null)
+      } catch (error) {
+        console.error('Error fetching session:', error.message)
+      } finally {
+
+      }
+    }
+
+    getUser()
+    fetchProducts() // Fetch ads on mount
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+        } else {
+          entry.target.classList.remove('active');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    const elements = document.querySelectorAll('.scroll-reveal');
+    elements.forEach((el) => observer.observe(el));
+
+    return () => elements.forEach((el) => observer.unobserve(el));
+  }, [products]);
+
+  // Close dropdowns on click outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest('.filter-section')) setFilterOpen(false);
+      if (!e.target.closest('.sort-section')) setSortOpen(false);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const categories = [
+    { label: 'All Categories', value: 'all' },
+    { label: 'Billboard', value: 'billboard' },
+    { label: 'Digital Screen', value: 'digital' },
+    { label: 'Transit Ads', value: 'transit' },
+    { label: 'Wall Murals', value: 'mural' }
+  ];
+
+  const sortOptions = [
+    { label: 'Newest First', value: 'newest' },
+    { label: 'Price: Low to High', value: 'price-low' },
+    { label: 'Price: High to Low', value: 'price-high' },
+    { label: 'Location', value: 'location' }
+  ];
+
+  const [maxPrice, setMaxPrice] = useState('')
+  const [allLocations, setAllLocations] = useState(popularLocations)
+
+  // Applied filters state (updated only on search button click)
+  const [appliedLocation, setAppliedLocation] = useState('')
+  const [appliedMaxPrice, setAppliedMaxPrice] = useState('')
+
+  useEffect(() => {
+    if (products.length > 0) {
+      const productLocations = [...new Set(products.map(p => p.location).filter(Boolean))]
+      const uniqueLocations = [...new Set([...popularLocations, ...productLocations])]
+      setAllLocations(uniqueLocations)
+    }
+  }, [products])
+
+  const getPrice = (p) => {
+    if (typeof p.price === 'number') return p.price;
+    return parseInt(p.price?.toString().replace(/[^0-9]/g, '') || 0);
+  };
+
+  const handleSearch = () => {
+    setAppliedLocation(location);
+    setAppliedMaxPrice(maxPrice);
+  };
+
+  return (
+    <div>
+      <div className="home-container" id="ad-search-section">
+        {/* Custom Search Bar */}
+        <h2 className="search-heading scroll-reveal">Find Your Board</h2>
+
+        {/* Filter and Sort UI Controls */}
+        <div className="filter-sort-container scroll-reveal">
+          <div className="filter-section">
+            <label>Filter by Category:</label>
+            <div
+              className={`custom-select-trigger ${filterOpen ? 'active' : ''}`}
+              onClick={() => setFilterOpen(!filterOpen)}
+            >
+              {categories.find(c => c.value === filterCategory)?.label}
+            </div>
+            <div className={`custom-options ${filterOpen ? 'active' : ''}`}>
+              {categories.map((cat) => (
+                <div
+                  key={cat.value}
+                  className={`custom-option ${filterCategory === cat.value ? 'selected' : ''}`}
+                  onClick={() => {
+                    setFilterCategory(cat.value);
+                    setFilterOpen(false);
+                  }}
+                >
+                  {cat.label}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="sort-section">
+            <label>Sort by:</label>
+            <div
+              className={`custom-select-trigger ${sortOpen ? 'active' : ''}`}
+              onClick={() => setSortOpen(!sortOpen)}
+            >
+              {sortOptions.find(o => o.value === sortBy)?.label}
+            </div>
+            <div className={`custom-options ${sortOpen ? 'active' : ''}`}>
+              {sortOptions.map((option) => (
+                <div
+                  key={option.value}
+                  className={`custom-option ${sortBy === option.value ? 'selected' : ''}`}
+                  onClick={() => {
+                    setSortBy(option.value);
+                    setSortOpen(false);
+                  }}
+                >
+                  {option.label}
+                </div>
+              ))}
+            </div>
+          </div>
+
+
+        </div>
+
+        {/* Dynamic Product Grid or Global Map */}
+        {viewMode === 'grid' ? (
+          <div className="products-grid">
+            {products
+              .filter(product => {
+                const matchesStatus = (product.status === 'active' || (user && product.owner_id === user.id));
+                const matchesCategory = (filterCategory === 'all' || product.category === filterCategory);
+                const matchesLocation = appliedLocation === '' || (product.location && product.location.toLowerCase().includes(appliedLocation.toLowerCase()));
+                const matchesPrice = appliedMaxPrice === '' || getPrice(product) <= Number(appliedMaxPrice);
+
+                return matchesStatus && matchesCategory && matchesLocation && matchesPrice;
+              })
+              .sort((a, b) => {
+                if (sortBy === 'newest') return new Date(b.created_at || b.createdAt || 0) - new Date(a.created_at || a.createdAt || 0);
+                if (sortBy === 'price-low') return getPrice(a) - getPrice(b);
+                if (sortBy === 'price-high') return getPrice(b) - getPrice(a);
+                if (sortBy === 'location') return (a.location || '').localeCompare(b.location || '');
+                return 0;
+              })
+              .map((product, index) => {
+                const AdImage = ({ image }) => {
+                  if (!image) return null;
+
+                  let img = Array.isArray(image) ? image[0] : image;
+                  // Sometimes Supabase returns jsonb as a string like '["path"]'
+                  if (typeof img === 'string' && (img.startsWith('[') || img.startsWith('"'))) {
+                    try {
+                      const parsed = JSON.parse(img);
+                      img = Array.isArray(parsed) ? parsed[0] : parsed;
+                    } catch (e) {
+                      img = img.replace(/[\[\]"]/g, '');
+                    }
+                  }
+
+                  if (img && typeof img === 'string' && img.includes('/')) {
+                    const baseUrl = import.meta.env.VITE_SUPABASE_URL;
+                    const publicUrl = `${baseUrl}/storage/v1/object/public/ads-images/${img}`;
+                    return <img
+                      src={publicUrl}
+                      alt="AdBoard"
+                      className="real-ad-image-small"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        const parent = e.target.parentElement;
+                        if (parent) parent.innerHTML = '<span class="ad-emoji-placeholder-small">📢</span>';
+                      }}
+                    />;
+                  }
+                  return <span className="ad-emoji-placeholder-small">{img}</span>;
+                };
+
+                return (
+                  <div
+                    key={product.id || product._id || Math.random()}
+                    className={`product-card scroll-reveal scroll-reveal-delay-${(index % 3) + 1}`}
+                    onClick={() => openAdDetails(product.id || product._id)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <div className="product-image">
+                      <AdImage image={product.image} />
+                    </div>
+                    <div className="product-info">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <h3 className="product-name">{product.name}</h3>
+                        <span className={`status-tag-small ${product.is_booked && new Date(product.booked_until) > new Date()
+                          ? 'booked'
+                          : (product.status !== 'active' ? 'pending' : 'available')
+                          }`}>
+                          {product.is_booked && new Date(product.booked_until) > new Date()
+                            ? 'Booked'
+                            : (product.status !== 'active' ? 'Pending' : 'Available')}
+                        </span>
+                      </div>
+                      <p className="product-location">📍 {product.location}</p>
+                      <p className="product-size">📏 {product.size}</p>
+                      <div className="product-footer">
+                        <span className="product-price">{product.price || 0}₹/Month</span>
+                        <div className="card-actions">
+                          <button
+                            className="view-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openAdDetails(product.id || product._id);
+                            }}
+                          >
+                            Details
+                          </button>
+                          <button
+                            className={`book-btn-mini ${(product.is_booked && new Date(product.booked_until) > new Date()) || (product.status !== 'active') ? 'disabled' : ''}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const isAdmin = localStorage.getItem('isAdminLoggedIn') === 'true';
+                              if (isAdmin) {
+                                alert("Admins cannot book ads. Please use a regular user account for testing the booking flow.");
+                                return;
+                              }
+                              navigate(`/book/${product.id || product._id}`);
+                            }}
+                            disabled={(product.is_booked && new Date(product.booked_until) > new Date()) || (product.status !== 'active')}
+                          >
+                            {product.is_booked && new Date(product.booked_until) > new Date() ? 'Booked' : (product.status !== 'active' ? 'Pending' : 'Book')}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+        ) : (
+          <div className="global-map-container scroll-reveal">
+            <GlobalMap ads={products.filter(product => {
+              const matchesStatus = (product.status === 'active' || (user && product.owner_id === user.id));
+              const matchesCategory = (filterCategory === 'all' || product.category === filterCategory);
+              const matchesLocation = appliedLocation === '' || (product.location && product.location.toLowerCase().includes(appliedLocation.toLowerCase()));
+              const matchesPrice = appliedMaxPrice === '' || getPrice(product) <= Number(appliedMaxPrice);
+
+              return matchesStatus && matchesCategory && matchesLocation && matchesPrice;
+            })}
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default AdList

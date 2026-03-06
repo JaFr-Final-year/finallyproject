@@ -1,19 +1,17 @@
 import React, { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import Navbar from '../components/navbar'
 import { supabase } from '../utils/supabase'
 
-/**
- * Vendor page component allowing users to list new advertising spaces.
- * Includes a form with drag-and-drop image upload, proof of ownership, and other details.
- */
+
 const Vendor = () => {
     // Hooks
     const navigate = useNavigate()
 
     // Form state
     const [formData, setFormData] = useState({
-        name: '', // Added name/title
-        category: 'billboard', // Added category with default
+        name: '', 
+        category: 'billboard', 
         location: '',
         contactNumber: '',
         price: '',
@@ -105,41 +103,42 @@ const Vendor = () => {
 
             if (authError || !user) {
                 console.error("Auth Error:", authError)
+                alert("Please login")
                 alert("You must be logged in to submit a listing.")
                 setLoading(false)
                 return
             }
 
-            // Prepare data for insertion
-            const categoryIcons = {
-                billboard: '🏙️',
-                digital: '📺',
-                transit: '🚌',
-                mural: '🎨'
+            // Prepare data using FormData to support file uploads
+            const data = new FormData()
+            data.append('title', formData.name)
+            data.append('name', formData.name)
+            data.append('location', formData.location)
+            data.append('price', formData.price)
+            data.append('size', formData.size)
+            data.append('description', `${formData.description}\n\nContact Number: ${formData.contactNumber}`)
+            data.append('category', formData.category)
+            data.append('owner_id', user.id)
+
+            // Append the first image if available
+            if (images.length > 0) {
+                data.append('image', images[0].file)
             }
 
-            const adData = {
-                name: formData.name,
-                location: formData.location,
-                price: formData.price,
-                size: formData.size,
-                description: `${formData.description}\n\nContact Number: ${formData.contactNumber}`,
-                category: formData.category,
-                owner_id: user.id,
-                image: categoryIcons[formData.category] || '📢', // Fallback image/icon
-            }
+            const response = await fetch("http://localhost:5000/api/ads", {
+                method: "POST",
+                body: data // FormData automatically sets the correct Content-Type header
+            })
 
-            const { error } = await supabase
-                .from('ads')
-                .insert([adData])
-
-            if (error) {
-                console.error("Supabase Insert Error:", error)
-                throw error
+            if (!response.ok) {
+                const errorData = await response.json()
+                console.error("Backend Insert Error:", errorData)
+                throw new Error(errorData.error || "Failed to create ad")
             }
 
             alert("Listing submitted successfully! Redirecting to Ad List...")
 
+            // Redirect to AdList
             // Redirect to AdList to see the new item
             navigate('/adlist')
 
@@ -225,36 +224,33 @@ const Vendor = () => {
                             />
                         </div>
 
-                        {/* Size (Dimensions) */}
-                        <div className="form-group scroll-reveal">
-                            <label>Size (Dimensions)</label>
-                            <input
-                                type="text"
-                                name="size"
-                                className="form-input"
-                                placeholder="e.g. 14x48 ft"
-                                value={formData.size}
-                                onChange={handleChange}
-                                required
-                            />
+                        {/* Size and Price */}
+                        <div className="form-row-container" style={{ display: 'flex', gap: '1rem', gridColumn: 'span 1' }}>
+                            <div className="form-group" style={{ flex: 1 }}>
+                                <label>Size (Dimensions)</label>
+                                <input
+                                    type="text"
+                                    name="size"
+                                    className="form-input"
+                                    placeholder="e.g. 14x48 ft"
+                                    value={formData.size}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group" style={{ flex: 1 }}>
+                                <label>Price per Month</label>
+                                <input
+                                    type="text"
+                                    name="price"
+                                    className="form-input"
+                                    placeholder="e.g. ₹500"
+                                    value={formData.price}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
                         </div>
-
-                        {/* Price per Month */}
-                        <div className="form-group scroll-reveal">
-                            <label>Price per Month</label>
-                            <input
-                                type="text"
-                                name="price"
-                                className="form-input"
-                                placeholder="e.g. ₹500"
-                                value={formData.price}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-
-                        {/* Spacer to push Contact Number to the right */}
-                        <div className="spacer-group"></div>
 
                         {/* Contact Number */}
                         <div className="form-group scroll-reveal">
@@ -346,8 +342,8 @@ const Vendor = () => {
                             />
                         </div>
 
-                        <div className="full-width scroll-reveal">
-                            <button type="submit" className="submit-btn" style={{ width: '100%' }} disabled={loading}>
+                        <div className="full-width scroll-reveal centered-group">
+                            <button type="submit" className="submit-btn" style={{ width: '100%', maxWidth: '400px' }} disabled={loading}>
                                 {loading ? 'Submitting...' : 'Submit Listing'}
                             </button>
                         </div>
