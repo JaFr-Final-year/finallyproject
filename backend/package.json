@@ -11,12 +11,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@dataconnect/generated": "file:src/dataconnect-generated",
     "@supabase/supabase-js": "^2.39.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.22.1",
-    "firebase": "^12.8.0",
     "multer": "^2.0.2"
   },
   "devDependencies": {

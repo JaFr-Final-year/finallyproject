@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import './AdBoard.css'
 // import { supabase } from '../utils/supabase'
 import { supabase } from '../utils/supabase'
+import AdMap from '../components/Map'
 
 const AdBoard = () => {
     const { id } = useParams()
@@ -80,6 +81,8 @@ const AdBoard = () => {
     }
 
     const isEffectivelyBooked = product.is_booked && new Date(product.booked_until) > new Date();
+    const isPending = product.status !== 'active';
+    const isAdmin = localStorage.getItem('isAdminLoggedIn') === 'true';
 
     const AdImage = ({ image }) => {
         if (!image) return null;
@@ -129,8 +132,8 @@ const AdBoard = () => {
                         <div className="ad-title-block">
                             <h1 className="ad-title">{product.name}</h1>
                             <p className="ad-location">📍 {product.location}</p>
-                            <div className={`status-badge ${isEffectivelyBooked ? 'booked' : 'available'}`}>
-                                {isEffectivelyBooked ? '🔴 Booked' : '🟢 Available'}
+                            <div className={`status-badge ${isEffectivelyBooked ? 'booked' : (isPending ? 'pending' : 'available')}`}>
+                                {isEffectivelyBooked ? '🔴 Booked' : (isPending ? '⏳ Pending Approval' : '🟢 Available')}
                             </div>
                         </div>
                         <div className="ad-price-tag">
@@ -139,55 +142,69 @@ const AdBoard = () => {
                     </div>
 
                     <div className="ad-details-grid">
-                        <div className="ad-info-card">
-                            <h3>Run Details</h3>
-                            <ul className="ad-specs-list">
-                                <li><span className="label">Category:</span> {product.category}</li>
-                                <li><span className="label">Size:</span> {product.size}</li>
-                                <li><span className="label">ID:</span> {product.id}</li>
-                                {isEffectivelyBooked && (
-                                    <>
-                                        <li>
-                                            <span className="label">Booked Until:</span>
-                                            <span className="value finish-date">
-                                                {new Date(product.booked_until).toLocaleDateString(undefined, {
-                                                    year: 'numeric',
-                                                    month: 'long',
-                                                    day: 'numeric'
-                                                })}
-                                            </span>
-                                        </li>
-                                        <li>
-                                            <span className="label">Remaining:</span>
-                                            <span className="value time-left">
-                                                {(() => {
-                                                    const now = new Date();
-                                                    const end = new Date(product.booked_until);
-                                                    const diffTime = Math.abs(end - now);
-                                                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                                                    return `${diffDays} days left`;
-                                                })()}
-                                            </span>
-                                        </li>
-                                    </>
-                                )}
-                            </ul>
+                        <div className="ad-info-stack">
+                            <div className="ad-info-card">
+                                <h3>Run Details</h3>
+                                <ul className="ad-specs-list">
+                                    <li><span className="label">Category:</span> {product.category}</li>
+                                    <li><span className="label">Size:</span> {product.size}</li>
+                                    <li><span className="label">ID:</span> {product.id}</li>
+                                    {isEffectivelyBooked && (
+                                        <>
+                                            <li>
+                                                <span className="label">Booked Until:</span>
+                                                <span className="value finish-date">
+                                                    {new Date(product.booked_until).toLocaleDateString(undefined, {
+                                                        year: 'numeric',
+                                                        month: 'long',
+                                                        day: 'numeric'
+                                                    })}
+                                                </span>
+                                            </li>
+                                            <li>
+                                                <span className="label">Remaining:</span>
+                                                <span className="value time-left">
+                                                    {(() => {
+                                                        const now = new Date();
+                                                        const end = new Date(product.booked_until);
+                                                        const diffTime = Math.abs(end - now);
+                                                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                                                        return `${diffDays} days left`;
+                                                    })()}
+                                                </span>
+                                            </li>
+                                        </>
+                                    )}
+                                </ul>
+                            </div>
+                            <div className="ad-info-card">
+                                <h3>Description</h3>
+                                <p className="ad-description">
+                                    {product.description}
+                                </p>
+                            </div>
                         </div>
-                        <div className="ad-info-card">
-                            <h3>Description</h3>
-                            <p className="ad-description">
-                                {product.description}
-                            </p>
+                        <div className="ad-info-card map-card">
+                            <h3>Location Map</h3>
+                            <div className="ad-board-map-container">
+                                <AdMap locationName={product.location} height="100%" />
+                            </div>
                         </div>
                     </div>
 
-                    <button
-                        className={`book-now-btn ${isEffectivelyBooked ? 'disabled' : ''}`}
-                        disabled={isEffectivelyBooked}
-                        onClick={handleBooking}
-                    >
-                        {isEffectivelyBooked ? 'Currently Unavailable' : 'Book Now'}
-                    </button>
+                    {isAdmin ? (
+                        <button className="book-now-btn disabled" disabled>
+                            Admin View (Booking Restricted)
+                        </button>
+                    ) : (
+                        <button
+                            className={`book-now-btn ${isEffectivelyBooked || isPending ? 'disabled' : ''}`}
+                            disabled={isEffectivelyBooked || isPending}
+                            onClick={handleBooking}
+                        >
+                            {isEffectivelyBooked ? 'Currently Unavailable' : (isPending ? 'Waiting for Approval' : 'Book Now')}
+                        </button>
+                    )}
                 </div>
             </div>
         </div>

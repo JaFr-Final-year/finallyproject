@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../utils/supabase';
 import './admin.css';
 
 const Admin = () => {
+    const navigate = useNavigate();
     // Auth State
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('isAdminLoggedIn') === 'true');
     const [loginCreds, setLoginCreds] = useState({ username: '', password: '' });
 
     // Dashboard State
@@ -29,15 +30,27 @@ const Admin = () => {
         if (isLoggedIn) {
             fetchAds();
         }
+
+        // Cleanup: revoke admin access when navigating away or closing this view
+        return () => {
+            localStorage.removeItem('isAdminLoggedIn');
+        };
     }, [isLoggedIn]);
 
     const handleLogin = (e) => {
         e.preventDefault();
         if (loginCreds.username === 'admin' && loginCreds.password === 'admin123') {
             setIsLoggedIn(true);
+            localStorage.setItem('isAdminLoggedIn', 'true');
         } else {
             alert('Invalid credentials');
         }
+    };
+
+    const handleLogout = () => {
+        setIsLoggedIn(false);
+        localStorage.removeItem('isAdminLoggedIn');
+        navigate('/');
     };
 
     const fetchAds = async () => {
@@ -201,10 +214,32 @@ const Admin = () => {
         : ads;
 
     const AdminHeader = () => (
-        <header className="admin-custom-header">
-            <Link to="/" className="admin-logo-link">
+        <header className="admin-custom-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ visibility: 'hidden', width: '100px' }}></div> {/* Spacer for centering */}
+            <div
+                onClick={handleLogout}
+                className="admin-logo-link"
+                style={{ cursor: 'pointer' }}
+            >
                 <span className="admin-logo-text">SpaceToAd</span>
-            </Link>
+            </div>
+            {isLoggedIn ? (
+                <button
+                    onClick={handleLogout}
+                    style={{
+                        padding: '0.6rem 1.2rem',
+                        background: 'rgba(239, 68, 68, 0.1)',
+                        color: '#ef4444',
+                        border: '1px solid rgba(239, 68, 68, 0.2)',
+                        borderRadius: '50px',
+                        cursor: 'pointer',
+                        fontWeight: '700',
+                        fontSize: '0.9rem'
+                    }}
+                >
+                    Logout
+                </button>
+            ) : <div style={{ width: '100px' }}></div>}
         </header>
     );
 
@@ -318,7 +353,11 @@ const Admin = () => {
                                     ) : (
                                         filteredAds.map(ad => (
                                             <tr key={ad.id} className="row-item">
-                                                <td>{ad.name || 'Untitled'}</td>
+                                                <td>
+                                                    <Link to={`/ad/${ad.id}`} className="admin-ad-link">
+                                                        {ad.name || 'Untitled'}
+                                                    </Link>
+                                                </td>
                                                 <td>{ad.location}</td>
                                                 <td>{new Date(ad.created_at).toLocaleDateString()}</td>
                                                 <td style={{ color: '#c5a059', fontWeight: '800' }}>₹{ad.price}</td>

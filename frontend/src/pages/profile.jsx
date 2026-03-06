@@ -248,15 +248,22 @@ const Profile = () => {
                   <div key={item.id} className="activity-item">
                     <div className="activity-info">
                       <h4>{item.name}</h4>
-                      <p>{item.is_booked ? '🔴 Booked' : '🟢 Available'}</p>
+                      <p>
+                        {item.is_booked
+                          ? '🔴 Booked'
+                          : (item.status !== 'active' ? '⏳ Pending Approval' : '🟢 Available')}
+                      </p>
                       <div className="listing-actions">
                         <button className="edit-btn" onClick={() => handleEditClick(item)}>Edit</button>
                         <button className="delete-btn" onClick={() => handleDeleteListing(item.id)}>Delete</button>
                       </div>
                     </div>
                     <div className="activity-status">
-                      <span className={`status-badge ${item.is_booked ? 'status-pending' : 'status-active'}`}>
-                        {item.is_booked ? 'Rented' : 'Active'}
+                      <span className={`status-badge ${item.is_booked
+                          ? 'status-pending'
+                          : (item.status !== 'active' ? 'status-alert' : 'status-active')
+                        }`}>
+                        {item.is_booked ? 'Rented' : (item.status !== 'active' ? 'Pending' : 'Active')}
                       </span>
                       <span className="activity-amount">{item.price}₹</span>
                     </div>

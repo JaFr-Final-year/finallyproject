@@ -1,12 +1,7 @@
-
-
-
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
-
-console.log('Index.js starting...');
 
 dotenv.config({ path: path.resolve(__dirname, '.env') }); // Must be loaded before other local imports that use env vars
 

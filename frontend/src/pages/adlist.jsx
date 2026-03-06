@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../utils/supabase'
+import GlobalMap from '../components/GlobalMap'
 
 /**
  * AdList component that displays available advertising spaces.
@@ -23,6 +24,8 @@ const AdList = () => {
   const openAdDetails = (id) => {
     navigate(`/ad/${id}`)
   }
+
+  const [viewMode, setViewMode] = useState('grid') // 'grid' | 'map'
 
   const popularLocations = ['Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai', 'Kolkata', 'Pune', 'Ahmedabad', 'Jaipur', 'Surat']
 
@@ -204,94 +207,132 @@ const AdList = () => {
               ))}
             </div>
           </div>
+
+
         </div>
 
-        {/* Dynamic Product Grid */}
-        <div className="products-grid">
-          {products
-            .filter(product => {
+        {/* Dynamic Product Grid or Global Map */}
+        {viewMode === 'grid' ? (
+          <div className="products-grid">
+            {products
+              .filter(product => {
+                const matchesStatus = (product.status === 'active' || (user && product.owner_id === user.id));
+                const matchesCategory = (filterCategory === 'all' || product.category === filterCategory);
+                const matchesLocation = appliedLocation === '' || (product.location && product.location.toLowerCase().includes(appliedLocation.toLowerCase()));
+                const matchesPrice = appliedMaxPrice === '' || getPrice(product) <= Number(appliedMaxPrice);
+
+                return matchesStatus && matchesCategory && matchesLocation && matchesPrice;
+              })
+              .sort((a, b) => {
+                if (sortBy === 'newest') return new Date(b.created_at || b.createdAt || 0) - new Date(a.created_at || a.createdAt || 0);
+                if (sortBy === 'price-low') return getPrice(a) - getPrice(b);
+                if (sortBy === 'price-high') return getPrice(b) - getPrice(a);
+                if (sortBy === 'location') return (a.location || '').localeCompare(b.location || '');
+                return 0;
+              })
+              .map((product, index) => {
+                const AdImage = ({ image }) => {
+                  if (!image) return null;
+
+                  let img = Array.isArray(image) ? image[0] : image;
+                  // Sometimes Supabase returns jsonb as a string like '["path"]'
+                  if (typeof img === 'string' && (img.startsWith('[') || img.startsWith('"'))) {
+                    try {
+                      const parsed = JSON.parse(img);
+                      img = Array.isArray(parsed) ? parsed[0] : parsed;
+                    } catch (e) {
+                      img = img.replace(/[\[\]"]/g, '');
+                    }
+                  }
+
+                  if (img && typeof img === 'string' && img.includes('/')) {
+                    const baseUrl = import.meta.env.VITE_SUPABASE_URL;
+                    const publicUrl = `${baseUrl}/storage/v1/object/public/ads-images/${img}`;
+                    return <img
+                      src={publicUrl}
+                      alt="AdBoard"
+                      className="real-ad-image-small"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        const parent = e.target.parentElement;
+                        if (parent) parent.innerHTML = '<span class="ad-emoji-placeholder-small">📢</span>';
+                      }}
+                    />;
+                  }
+                  return <span className="ad-emoji-placeholder-small">{img}</span>;
+                };
+
+                return (
+                  <div
+                    key={product.id || product._id || Math.random()}
+                    className={`product-card scroll-reveal scroll-reveal-delay-${(index % 3) + 1}`}
+                    onClick={() => openAdDetails(product.id || product._id)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <div className="product-image">
+                      <AdImage image={product.image} />
+                    </div>
+                    <div className="product-info">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <h3 className="product-name">{product.name}</h3>
+                        <span className={`status-tag-small ${product.is_booked && new Date(product.booked_until) > new Date()
+                          ? 'booked'
+                          : (product.status !== 'active' ? 'pending' : 'available')
+                          }`}>
+                          {product.is_booked && new Date(product.booked_until) > new Date()
+                            ? 'Booked'
+                            : (product.status !== 'active' ? 'Pending' : 'Available')}
+                        </span>
+                      </div>
+                      <p className="product-location">📍 {product.location}</p>
+                      <p className="product-size">📏 {product.size}</p>
+                      <div className="product-footer">
+                        <span className="product-price">{product.price || 0}₹/Month</span>
+                        <div className="card-actions">
+                          <button
+                            className="view-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openAdDetails(product.id || product._id);
+                            }}
+                          >
+                            Details
+                          </button>
+                          <button
+                            className={`book-btn-mini ${(product.is_booked && new Date(product.booked_until) > new Date()) || (product.status !== 'active') ? 'disabled' : ''}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const isAdmin = localStorage.getItem('isAdminLoggedIn') === 'true';
+                              if (isAdmin) {
+                                alert("Admins cannot book ads. Please use a regular user account for testing the booking flow.");
+                                return;
+                              }
+                              navigate(`/book/${product.id || product._id}`);
+                            }}
+                            disabled={(product.is_booked && new Date(product.booked_until) > new Date()) || (product.status !== 'active')}
+                          >
+                            {product.is_booked && new Date(product.booked_until) > new Date() ? 'Booked' : (product.status !== 'active' ? 'Pending' : 'Book')}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+        ) : (
+          <div className="global-map-container scroll-reveal">
+            <GlobalMap ads={products.filter(product => {
               const matchesStatus = (product.status === 'active' || (user && product.owner_id === user.id));
               const matchesCategory = (filterCategory === 'all' || product.category === filterCategory);
               const matchesLocation = appliedLocation === '' || (product.location && product.location.toLowerCase().includes(appliedLocation.toLowerCase()));
               const matchesPrice = appliedMaxPrice === '' || getPrice(product) <= Number(appliedMaxPrice);
 
               return matchesStatus && matchesCategory && matchesLocation && matchesPrice;
-            })
-            .sort((a, b) => {
-              if (sortBy === 'newest') return new Date(b.created_at || b.createdAt || 0) - new Date(a.created_at || a.createdAt || 0);
-              if (sortBy === 'price-low') return getPrice(a) - getPrice(b);
-              if (sortBy === 'price-high') return getPrice(b) - getPrice(a);
-              if (sortBy === 'location') return (a.location || '').localeCompare(b.location || '');
-              return 0;
-            })
-            .map((product, index) => {
-              const AdImage = ({ image }) => {
-                if (!image) return null;
-
-                let img = Array.isArray(image) ? image[0] : image;
-                // Sometimes Supabase returns jsonb as a string like '["path"]'
-                if (typeof img === 'string' && (img.startsWith('[') || img.startsWith('"'))) {
-                  try {
-                    const parsed = JSON.parse(img);
-                    img = Array.isArray(parsed) ? parsed[0] : parsed;
-                  } catch (e) {
-                    img = img.replace(/[\[\]"]/g, '');
-                  }
-                }
-
-                if (img && typeof img === 'string' && img.includes('/')) {
-                  const baseUrl = import.meta.env.VITE_SUPABASE_URL;
-                  const publicUrl = `${baseUrl}/storage/v1/object/public/ads-images/${img}`;
-                  return <img
-                    src={publicUrl}
-                    alt="AdBoard"
-                    className="real-ad-image-small"
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                      const parent = e.target.parentElement;
-                      if (parent) parent.innerHTML = '<span class="ad-emoji-placeholder-small">📢</span>';
-                    }}
-                  />;
-                }
-                return <span className="ad-emoji-placeholder-small">{img}</span>;
-              };
-
-              return (
-                <div
-                  key={product.id || product._id || Math.random()}
-                  className={`product-card scroll-reveal scroll-reveal-delay-${(index % 3) + 1}`}
-                  onClick={() => openAdDetails(product.id || product._id)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <div className="product-image">
-                    <AdImage image={product.image} />
-                  </div>
-                  <div className="product-info">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <h3 className="product-name">{product.name}</h3>
-                      <span className={`status-tag-small ${product.is_booked && new Date(product.booked_until) > new Date() ? 'booked' : 'available'}`}>
-                        {product.is_booked && new Date(product.booked_until) > new Date() ? 'Booked' : 'Available'}
-                      </span>
-                    </div>
-                    <p className="product-location">📍 {product.location}</p>
-                    <p className="product-size">📏 {product.size}</p>
-                    <div className="product-footer">
-                      <span className="product-price">{product.price || 0}₹/Month</span>
-                      <button
-                        className="view-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openAdDetails(product.id || product._id);
-                        }}
-                      >
-                        View Details
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
             })}
-        </div>
+            />
+          </div>
+        )}
       </div>
     </div>
   );

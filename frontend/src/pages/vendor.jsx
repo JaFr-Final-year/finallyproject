@@ -3,18 +3,15 @@ import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/navbar'
 import { supabase } from '../utils/supabase'
 
-/**
- * Vendor page component allowing users to list new advertising spaces.
- * Includes a form with drag-and-drop image upload, proof of ownership, and other details.
- */
+
 const Vendor = () => {
     // Hooks
     const navigate = useNavigate()
 
     // Form state
     const [formData, setFormData] = useState({
-        name: '', // Added name/title
-        category: 'billboard', // Added category with default
+        name: '', 
+        category: 'billboard', 
         location: '',
         contactNumber: '',
         price: '',
